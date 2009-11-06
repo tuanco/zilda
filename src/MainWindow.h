@@ -12,6 +12,8 @@
 // Project
 #include "ui_MainWindow.h"
 
+class Sequence;
+
 class MainWindow : 
 	public QMainWindow,
 	protected Ui_MainWindow
@@ -23,7 +25,19 @@ public:
 	MainWindow(QWidget *parent = 0L, Qt::WFlags flags = 0);
 	virtual ~MainWindow();
 
+
+protected:
+
+	void resizeEvent(QResizeEvent *event);
+
 protected slots:
 
 	void fileOpen();
+
+
+private:
+
+	void createScene();
+
+	Sequence *_sequence;
 };

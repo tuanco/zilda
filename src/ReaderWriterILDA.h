@@ -12,6 +12,10 @@
 // Qt
 #include <QtCore>
 
+// Project
+#include "Sequence.h"
+
+
 class ReaderWriterILDA
 {
 public:
@@ -19,7 +23,7 @@ public:
 			ReaderWriterILDA();
 	virtual ~ReaderWriterILDA();
 
-	bool	readFile(const QString& fileName);
+	Sequence*	readFile(const QString& fileName);
 
 
 private:
@@ -28,4 +32,6 @@ private:
 	void	readHeader(QDataStream& stream, QString& name, 
 					   QString& companyName, quint16& entryCount, 
 					   quint16& objectNumber, quint16& objectCount);
+
+	Sequence *_sequence;
 };

@@ -9,6 +9,7 @@
 
 // Project
 #include "ReaderWriterILDA.h"
+#include "Frame.h"
 
 //=======================================================================================
 
@@ -24,7 +25,7 @@ ReaderWriterILDA::~ReaderWriterILDA()
 
 //=======================================================================================
 
-bool ReaderWriterILDA::readFile(const QString& fileName)
+Sequence* ReaderWriterILDA::readFile(const QString& fileName)
 {
 	QFile file(fileName);
 
@@ -33,6 +34,8 @@ bool ReaderWriterILDA::readFile(const QString& fileName)
 		bool eof = false;
 		QDataStream stream(&file);
 		stream.setByteOrder(QDataStream::BigEndian);
+
+		_sequence = new Sequence();
 
 		while (!stream.atEnd() && !eof)
 		{
@@ -43,7 +46,7 @@ bool ReaderWriterILDA::readFile(const QString& fileName)
 			if (qstrcmp(signature, "ILDA"))
 			{
 				file.close();
-				return false;
+				return 0L;
 			}
 
 			stream.skipRawData(3);
@@ -77,7 +80,7 @@ bool ReaderWriterILDA::readFile(const QString& fileName)
 		file.close();
 	}
 
-	return true;
+	return _sequence;
 }
 
 //=======================================================================================
@@ -109,6 +112,7 @@ bool ReaderWriterILDA::readFrameSection(QDataStream& stream, bool is3DFrame)
 {
 	QString name, companyName;
 	quint16 entryCount, objectNumber, objectCount;
+	Frame *frame = new Frame();
 
 	readHeader(stream, name, companyName, entryCount, objectNumber, objectCount);
 
@@ -125,7 +129,14 @@ bool ReaderWriterILDA::readFrameSection(QDataStream& stream, bool is3DFrame)
 			z = 0;
 
 		stream >> stateByte >> colorIndex;
+
+		frame->addPoint(x, y, z);
 	}
+
+	if (entryCount > 0)
+		_sequence->addFrame(frame);
+	else
+		delete frame;
 
 	return entryCount == 0;
 }
