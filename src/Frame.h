@@ -3,20 +3,19 @@
 // Qt
 #include <QList>
 
+#include "Point.h"
+
 class Frame
 {
 public:
 			Frame();
 	virtual ~Frame();
 
-	void	addPoint(float x, float y, float z);
-	int		pointCount() const { return _points.count() / 3; }
-	float	pointX(int index) const { return _points[index * 3]; }
-	float	pointY(int index) const { return _points[index * 3 + 1]; }
-	float	pointZ(int index) const { return _points[index * 3 + 2]; }
-
+	void	addPoint(const Point& point);
+	int		pointCount() const { return _points.count(); }
+	Point	point(int index) { return _points[index]; }
 
 private:
 
-	QList<float> _points;
+	QList<Point> _points;
 };

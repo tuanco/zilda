@@ -37,7 +37,5 @@ protected slots:
 
 private:
 
-	void createScene();
-
-	Sequence *_sequence;
+	void setSequence(Sequence *seq);
 };
