@@ -4,10 +4,12 @@ TEMPLATE = app
 TARGET = zILDA
 
 HEADERS += src/MainWindow.h \
-			src/DarkStyle.h
+			src/DarkStyle.h \
+			src/ReaderWriterILDA.h
 SOURCES += src/main.cpp \
 			src/MainWindow.cpp \
-			src/DarkStyle.cpp
+			src/DarkStyle.cpp \
+			src/ReaderWriterILDA.cpp
 FORMS += src/MainWindow.ui
 #RESOURCES += resources.qrc
 

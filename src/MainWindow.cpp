@@ -12,6 +12,7 @@
 
 // Project
 #include "MainWindow.h"
+#include "ReaderWriterILDA.h"
 
 //=======================================================================================
 
@@ -49,7 +50,8 @@ void MainWindow::fileOpen()
 		
 		if (fileInfo.exists())
 		{
-			
+			ReaderWriterILDA reader;
+			reader.readFile(fileName);
 		}
 	}
 }
