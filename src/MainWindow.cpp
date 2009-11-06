@@ -52,18 +52,20 @@ void MainWindow::fileOpen()
 		if (fileInfo.exists())
 		{
 			ReaderWriterILDA reader;
-			_sequence = reader.readFile(fileName);
-			createScene();
+			Sequence *sequence = reader.readFile(fileName);
+			setSequence(sequence);
 		}
 	}
 }
 
-void MainWindow::createScene()
+//=======================================================================================
+
+void MainWindow::setSequence(Sequence *seq)
 {
-	if (!_sequence || _sequence->frameCount() == 0)
+	if (!seq || seq->frameCount() == 0)
 		return;
 
-	Frame *frame = _sequence->frame(0);
+	Frame *frame = seq->frame(0);
 
 	QGraphicsScene *scene = new QGraphicsScene();
 	graphicsView->setScene(scene);
@@ -72,20 +74,18 @@ void MainWindow::createScene()
 
 	for (int i=0; i<frame->pointCount()-1; ++i)
 	{
-		float x1, y1;
-		float x2, y2;
+		Point p1 = frame->point(i);
+		Point p2 = frame->point(i+1);
 
-		x1 = frame->pointX(i);
-		y1 = frame->pointY(i);
-		x2 = frame->pointX(i+1);
-		y2 = frame->pointY(i+1);
-
-		scene->addLine(x1, y1, x2, y2, pen);
+		if (!p1.isBlanked())
+			scene->addLine(p1.point().x(), p1.point().y(), p2.point().x(), p2.point().y(), pen);
 	}
 
 	resize(width()-1, height());
 	resize(width()+1, height());
 }
+
+//=======================================================================================
 
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
@@ -98,3 +98,5 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 
 	graphicsView->setMatrix(matrix);
 }
+
+//=======================================================================================

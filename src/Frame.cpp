@@ -8,9 +8,7 @@ Frame::~Frame()
 {
 }
 
-void Frame::addPoint(float x, float y, float z)
+void Frame::addPoint(const Point& point)
 {
-	_points.append(x);
-	_points.append(y);
-	_points.append(z);
+	_points.append(point);
 }

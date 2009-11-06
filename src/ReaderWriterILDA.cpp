@@ -10,6 +10,7 @@
 // Project
 #include "ReaderWriterILDA.h"
 #include "Frame.h"
+#include "Point.h"
 
 //=======================================================================================
 
@@ -43,7 +44,7 @@ Sequence* ReaderWriterILDA::readFile(const QString& fileName)
 
 			stream.readRawData(signature, 4);
 
-			if (qstrcmp(signature, "ILDA"))
+			if (memcmp(signature, "ILDA", 4))
 			{
 				file.close();
 				return 0L;
@@ -129,8 +130,10 @@ bool ReaderWriterILDA::readFrameSection(QDataStream& stream, bool is3DFrame)
 			z = 0;
 
 		stream >> stateByte >> colorIndex;
+		
+		Point p(QPointF(x, y), z, Qt::white, (stateByte & 64) == 64);
 
-		frame->addPoint(x, y, z);
+		frame->addPoint(p);
 	}
 
 	if (entryCount > 0)
