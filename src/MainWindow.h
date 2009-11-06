@@ -1,9 +1,9 @@
 /*
  *  MainWindow.h
- *  Zool
+ *  zILDA
  *
  *  Created by Andre Normann on 05.11.09.
- *  Copyright 2009 imp GmbH. All rights reserved.
+ *  Copyright 2009 Andre Normann. All rights reserved.
  *
  */
 

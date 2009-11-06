@@ -1,3 +1,12 @@
+/*
+ *  MainWindow.h
+ *  zILDA
+ *
+ *  Created by Andre Normann on 05.11.09.
+ *  Copyright 2009 Andre Normann. All rights reserved.
+ *
+ */
+
 //=======================================================================================
 //  Headerfiles
 //=======================================================================================
@@ -32,7 +41,7 @@ int main(int argc, char** argv)
 	
 	QString locale(QLocale::system().name());
 	QTranslator translator;
-	translator.load(QString("Zool_") + locale);
+	translator.load(QString("zILDA_") + locale);
 	app.installTranslator(&translator);
 	
 	MainWindow *mainWindow = new MainWindow();

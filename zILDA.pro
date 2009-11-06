@@ -1,7 +1,7 @@
 CONFIG += qt opengl exceptions thread rtti debug_and_release
 QT += opengl
 TEMPLATE = app
-TARGET = Zool
+TARGET = zILDA
 
 HEADERS += src/MainWindow.h \
 			src/DarkStyle.h
@@ -11,7 +11,7 @@ SOURCES += src/main.cpp \
 FORMS += src/MainWindow.ui
 #RESOURCES += resources.qrc
 
-TRANSLATIONS = Zool_de.ts
+TRANSLATIONS = zILDA_de.ts
 
 win32 {
     CONFIG += embed_manifest_exe
