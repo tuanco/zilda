@@ -32,8 +32,17 @@
         </color>
        </brush>
       </property>
+      <property name="interactive">
+       <bool>false</bool>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
       <property name="renderHints">
        <set>QPainter::Antialiasing|QPainter::HighQualityAntialiasing|QPainter::TextAntialiasing</set>
+      </property>
+      <property name="transformationAnchor">
+       <enum>QGraphicsView::NoAnchor</enum>
       </property>
      </widget>
     </item>
@@ -109,7 +118,7 @@
      <x>0</x>
      <y>0</y>
      <width>599</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

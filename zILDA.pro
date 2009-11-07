@@ -7,13 +7,15 @@ HEADERS += src/MainWindow.h \
 			src/DarkStyle.h \
 			src/ReaderWriterILDA.h \
 			src/Frame.h \
-			src/Sequence.h
+			src/Sequence.h \
+			src/Point.h
 SOURCES += src/main.cpp \
 			src/MainWindow.cpp \
 			src/DarkStyle.cpp \
 			src/ReaderWriterILDA.cpp \
 			src/Frame.cpp \
-			src/Sequence.cpp
+			src/Sequence.cpp \
+			src/Point.cpp
 FORMS += src/MainWindow.ui
 #RESOURCES += resources.qrc
 
