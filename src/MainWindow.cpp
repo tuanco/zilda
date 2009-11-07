@@ -19,14 +19,16 @@
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 : QMainWindow(parent, flags)
+, _timer(0L)
 {
 	setupUi(this);
 	
 	connect(actionOpen, SIGNAL(triggered()), this, SLOT(fileOpen()));
 	
 	QGraphicsScene *scene = new QGraphicsScene();
+	scene->addText(tr("No ILDA sequence loaded"));		
+	graphicsView->setInteractive(false);
 	graphicsView->setScene(scene);
-	scene->addText(tr("No ILDA sequence loaded"));
 }
 
 //=======================================================================================
@@ -52,51 +54,92 @@ void MainWindow::fileOpen()
 		if (fileInfo.exists())
 		{
 			ReaderWriterILDA reader;
-			Sequence *sequence = reader.readFile(fileName);
-			setSequence(sequence);
+			_sequence = reader.readFile(fileName);
+			setSequence(_sequence, 0);
+			
+			_frame = 0;
+			_maxFrames = _sequence->frameCount();
+			
+			if (_timer)
+			{
+				_timer->stop();
+				delete _timer;
+				_timer = 0L;
+			}
+			
+			_timer = new QTimer(this);
+			connect(_timer, SIGNAL(timeout()), this, SLOT(timerTriggered()));
+			_timer->start(42);
 		}
 	}
 }
 
 //=======================================================================================
 
-void MainWindow::setSequence(Sequence *seq)
+void MainWindow::setSequence(Sequence *seq, int index)
 {
 	if (!seq || seq->frameCount() == 0)
 		return;
 
-	Frame *frame = seq->frame(0);
-
+	Frame *frame = seq->frame(index);
 	QGraphicsScene *scene = new QGraphicsScene();
-	graphicsView->setScene(scene);
+	scene->setSceneRect(65535.0f / 2.0f * -1.0f, 65535.0f / 2.0f * -1.0f, 65535.0f, 65535.0f);
+	
+	QRect rect = graphicsView->viewport()->rect();
+	float scalingFactor = (rect.height() < rect.width()) ? rect.height() : rect.width();
+	scalingFactor /= 65535.0f;
+	
+	QMatrix matrix;
+	matrix.translate(rect.center().x(), rect.center().y());
+	matrix.scale(scalingFactor, -scalingFactor);
+	
+	graphicsView->setMatrix(matrix);
+	
 
 	QPen pen(Qt::white);
+	int i = 0;
+	int pointCount = frame->pointCount();
 
-	for (int i=0; i<frame->pointCount()-1; ++i)
+	while (i < pointCount)
 	{
-		Point p1 = frame->point(i);
-		Point p2 = frame->point(i+1);
-
-		if (!p1.isBlanked())
-			scene->addLine(p1.point().x(), p1.point().y(), p2.point().x(), p2.point().y(), pen);
+		Point p = frame->point(i);
+		
+		if (!p.isBlanked())
+		{
+			QPainterPath path;
+			path.moveTo(p.point());
+			
+			while (++i < pointCount && !frame->point(i).isBlanked())
+			{
+				path.lineTo(frame->point(i).point());
+			}
+			
+			if (i < pointCount)
+				path.lineTo(frame->point(i).point());
+			
+			scene->addPath(path, pen);
+		}
+		else
+			i++;
 	}
-
-	resize(width()-1, height());
-	resize(width()+1, height());
+	
+	graphicsView->setScene(scene);
 }
 
 //=======================================================================================
 
-void MainWindow::resizeEvent(QResizeEvent *event)
+void MainWindow::resizeEvent(QResizeEvent*)
 {
-	float scalingFactor = (graphicsView->height() < graphicsView->width()) ? graphicsView->height() : graphicsView->width();
-	scalingFactor /= 65535.0f;
-
-	QMatrix matrix;
-	matrix.translate(graphicsView->width() / 2.0f, graphicsView->height() / 2.0f);
-	matrix.scale(scalingFactor, -scalingFactor);
-
-	graphicsView->setMatrix(matrix);
 }
 
 //=======================================================================================
+
+void MainWindow::timerTriggered()
+{
+	if (_frame < _maxFrames-1)
+		_frame++;
+	else
+		_frame = 0;
+	
+	setSequence(_sequence, _frame);
+}
