@@ -10,7 +10,7 @@
 #include "Point.h"
 
 Point::Point(const QPointF& p, double z, const QColor& color, bool blanked)
-: _point(p)
+: QPointF(p)
 , _z(z)
 , _color(color)
 , _blanked(blanked)

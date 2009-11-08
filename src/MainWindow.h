@@ -48,4 +48,5 @@ private:
 	int		_maxFrames;
 	int		_frame;
 	Sequence *_sequence;
+	QGraphicsTextItem *_noFileLoadedItem;
 };

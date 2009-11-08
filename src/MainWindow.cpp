@@ -26,8 +26,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	connect(actionOpen, SIGNAL(triggered()), this, SLOT(fileOpen()));
 	
 	QGraphicsScene *scene = new QGraphicsScene();
-	scene->addText(tr("No ILDA sequence loaded"));		
-	graphicsView->setInteractive(false);
+	_noFileLoadedItem = scene->addText(tr("No ILDA sequence loaded"));		
 	graphicsView->setScene(scene);
 }
 
@@ -81,10 +80,24 @@ void MainWindow::setSequence(Sequence *seq, int index)
 	if (!seq || seq->frameCount() == 0)
 		return;
 
+	/*
+	QGraphicsScene *scene = graphicsView->scene();
+	scene->removeItem(_noFileLoadedItem);
+	
+	if (index == 0)
+		scene->removeItem(seq->frame(seq->frameCount()-1));
+	else
+		scene->removeItem(seq->frame(index--));
+
+	Frame *frame = seq->frame(index);
+	scene->addItem(frame);
+	*/
+
 	Frame *frame = seq->frame(index);
 	QGraphicsScene *scene = new QGraphicsScene();
-	scene->setSceneRect(65535.0f / 2.0f * -1.0f, 65535.0f / 2.0f * -1.0f, 65535.0f, 65535.0f);
-	
+//	scene->setSceneRect(65535.0f / 2.0f * -1.0f, 65535.0f / 2.0f * -1.0f, 65535.0f, 65535.0f);
+	scene->addItem(frame);
+
 	QRect rect = graphicsView->viewport()->rect();
 	float scalingFactor = (rect.height() < rect.width()) ? rect.height() : rect.width();
 	scalingFactor /= 65535.0f;
@@ -93,36 +106,7 @@ void MainWindow::setSequence(Sequence *seq, int index)
 	matrix.translate(rect.center().x(), rect.center().y());
 	matrix.scale(scalingFactor, -scalingFactor);
 	
-	graphicsView->setMatrix(matrix);
-	
-
-	QPen pen(Qt::white);
-	int i = 0;
-	int pointCount = frame->pointCount();
-
-	while (i < pointCount)
-	{
-		Point p = frame->point(i);
-		
-		if (!p.isBlanked())
-		{
-			QPainterPath path;
-			path.moveTo(p.point());
-			
-			while (++i < pointCount && !frame->point(i).isBlanked())
-			{
-				path.lineTo(frame->point(i).point());
-			}
-			
-			if (i < pointCount)
-				path.lineTo(frame->point(i).point());
-			
-			scene->addPath(path, pen);
-		}
-		else
-			i++;
-	}
-	
+	graphicsView->setMatrix(matrix);	
 	graphicsView->setScene(scene);
 }
 
