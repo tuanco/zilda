@@ -22,7 +22,6 @@ QRectF Frame::boundingRect() const
 
 void Frame::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-	QPen pen(Qt::white);
 	int i = 0;
 	int pointCount = _points.count();
 	
@@ -33,17 +32,21 @@ void Frame::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
 		if (!p.isBlanked())
 		{
 			QPainterPath path;
+			painter->setPen(QPen(p.color()));
 			path.moveTo(p);
 			
 			while (++i < pointCount && ! _points[i].isBlanked())
 			{
+				//painter->setPen(QPen(_points[i].color()));
 				path.lineTo( _points[i]);
 			}
 			
 			if (i < pointCount)
-				path.lineTo( _points[i]);
+			{
+				//painter->setPen(QPen(_points[i].color()));
+				path.lineTo(_points[i]);
+			}
 
-			painter->setPen(pen);
 			painter->drawPath(path);
 		}
 		else

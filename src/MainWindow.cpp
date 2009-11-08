@@ -94,8 +94,8 @@ void MainWindow::setSequence(Sequence *seq, int index)
 	*/
 
 	Frame *frame = seq->frame(index);
+	
 	QGraphicsScene *scene = new QGraphicsScene();
-//	scene->setSceneRect(65535.0f / 2.0f * -1.0f, 65535.0f / 2.0f * -1.0f, 65535.0f, 65535.0f);
 	scene->addItem(frame);
 
 	QRect rect = graphicsView->viewport()->rect();

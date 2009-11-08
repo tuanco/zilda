@@ -16,6 +16,74 @@
 
 ReaderWriterILDA::ReaderWriterILDA()
 {
+	_currentPalette.clear();
+	
+	_defaultIldaPalette.reserve(64);
+	_defaultIldaPalette.append(QColor(255, 0,   0));
+	_defaultIldaPalette.append(QColor(255, 16,  0));
+	_defaultIldaPalette.append(QColor(255, 32,  0));
+	_defaultIldaPalette.append(QColor(255, 48,  0));
+	_defaultIldaPalette.append(QColor(255, 64,  0));
+	_defaultIldaPalette.append(QColor(255, 80,  0));
+	_defaultIldaPalette.append(QColor(255, 96,  0));
+	_defaultIldaPalette.append(QColor(255, 112, 0));
+	_defaultIldaPalette.append(QColor(255, 128, 0));
+	_defaultIldaPalette.append(QColor(255, 144, 0));
+	_defaultIldaPalette.append(QColor(255, 160, 0));
+	_defaultIldaPalette.append(QColor(255, 176, 0));
+	_defaultIldaPalette.append(QColor(255, 192, 0));
+	_defaultIldaPalette.append(QColor(255, 208, 0));
+	_defaultIldaPalette.append(QColor(255, 224, 0));
+	_defaultIldaPalette.append(QColor(255, 240, 0));
+	_defaultIldaPalette.append(QColor(255, 255, 0));
+	_defaultIldaPalette.append(QColor(224, 255, 0));
+	_defaultIldaPalette.append(QColor(192, 255, 0));
+	_defaultIldaPalette.append(QColor(160, 255, 0));
+	_defaultIldaPalette.append(QColor(128, 255, 0));
+	_defaultIldaPalette.append(QColor(96,  255, 0));
+	_defaultIldaPalette.append(QColor(64,  255, 0));
+	_defaultIldaPalette.append(QColor(32,  255, 0));
+	_defaultIldaPalette.append(QColor(0,   255, 0));
+	_defaultIldaPalette.append(QColor(0,   255, 32));
+	_defaultIldaPalette.append(QColor(0,   255, 64));
+	_defaultIldaPalette.append(QColor(0,   255, 96));
+	_defaultIldaPalette.append(QColor(0,   255, 128));
+	_defaultIldaPalette.append(QColor(0,   255, 160));
+	_defaultIldaPalette.append(QColor(0,   255, 192));
+	_defaultIldaPalette.append(QColor(0,   255, 224));
+	_defaultIldaPalette.append(QColor(0,   130, 255));
+	_defaultIldaPalette.append(QColor(0,   114, 255));
+	_defaultIldaPalette.append(QColor(0,   104, 255));
+	_defaultIldaPalette.append(QColor(10,  96,  255));
+	_defaultIldaPalette.append(QColor(0,   82,  255));
+	_defaultIldaPalette.append(QColor(0,   74,  255));
+	_defaultIldaPalette.append(QColor(0,   64,  255));
+	_defaultIldaPalette.append(QColor(0,   32,  255));
+	_defaultIldaPalette.append(QColor(0,   0,   255));
+	_defaultIldaPalette.append(QColor(32,  0,   255));
+	_defaultIldaPalette.append(QColor(64,  0,   255));
+	_defaultIldaPalette.append(QColor(96,  0,   255));
+	_defaultIldaPalette.append(QColor(128, 0,   255));
+	_defaultIldaPalette.append(QColor(160, 0,   255));
+	_defaultIldaPalette.append(QColor(192, 0,   255));
+	_defaultIldaPalette.append(QColor(224, 0,   255));
+	_defaultIldaPalette.append(QColor(255, 0,   255));
+	_defaultIldaPalette.append(QColor(255, 32,  255));
+	_defaultIldaPalette.append(QColor(255, 64,  255));
+	_defaultIldaPalette.append(QColor(255, 96,  255));
+	_defaultIldaPalette.append(QColor(255, 128, 255));
+	_defaultIldaPalette.append(QColor(255, 160, 255));
+	_defaultIldaPalette.append(QColor(255, 192, 255));
+	_defaultIldaPalette.append(QColor(255, 224, 255));
+	_defaultIldaPalette.append(QColor(255, 255, 255));
+	_defaultIldaPalette.append(QColor(255, 224, 224));
+	_defaultIldaPalette.append(QColor(255, 255, 255));
+	_defaultIldaPalette.append(QColor(255, 160, 160));
+	_defaultIldaPalette.append(QColor(255, 128, 128));
+	_defaultIldaPalette.append(QColor(255, 96,  96));
+	_defaultIldaPalette.append(QColor(255, 64,  64));
+	_defaultIldaPalette.append(QColor(255, 32,  329));
+									  
 }
 
 //=======================================================================================
@@ -73,6 +141,7 @@ Sequence* ReaderWriterILDA::readFile(const QString& fileName)
 
 				case 3:
 					// True Color
+					eof = readTrueColorSection(stream);
 					break;
 			}
 
@@ -132,6 +201,11 @@ bool ReaderWriterILDA::readFrameSection(QDataStream& stream, bool is3DFrame)
 		stream >> stateByte >> colorIndex;
 		
 		Point p(QPointF(x, y), z, Qt::white, (stateByte & 64) == 64);
+	
+		if (_currentPalette.count() > 0)
+			p.setColor(_currentPalette.at(i));
+		else if (colorIndex < _defaultIldaPalette.count())
+			p.setColor(_defaultIldaPalette.at(colorIndex));
 
 		frame->addPoint(p);
 	}
@@ -145,3 +219,25 @@ bool ReaderWriterILDA::readFrameSection(QDataStream& stream, bool is3DFrame)
 }
 
 //=======================================================================================
+
+bool ReaderWriterILDA::readTrueColorSection(QDataStream& stream)
+{
+	quint32 dataLength, numberOfPoints;
+	
+	stream >> dataLength >> numberOfPoints;
+	
+	_currentPalette.clear();
+	_currentPalette.reserve(numberOfPoints);
+	
+	for (quint32 i=0; i<numberOfPoints; ++i)
+	{
+		quint8 r, g, b;
+		
+		stream >> r >> g >> b;
+		
+		_currentPalette.append(QColor(r, g, b));
+	}
+	
+	return numberOfPoints == 0;
+}
+

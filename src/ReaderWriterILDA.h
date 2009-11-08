@@ -27,11 +27,14 @@ public:
 
 
 private:
-
+	
+	bool	readTrueColorSection(QDataStream& stream);
 	bool	readFrameSection(QDataStream& stream, bool is3DFrame);
 	void	readHeader(QDataStream& stream, QString& name, 
 					   QString& companyName, quint16& entryCount, 
 					   quint16& objectNumber, quint16& objectCount);
 
 	Sequence *_sequence;
+	QVector<QColor> _currentPalette;
+	QVector<QColor> _defaultIldaPalette;
 };
