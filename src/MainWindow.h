@@ -16,6 +16,7 @@
 #include "ui_MainWindow.h"
 
 class Sequence;
+class Frame;
 
 class MainWindow : 
 	public QMainWindow,
@@ -37,11 +38,14 @@ protected:
 protected slots:
 
 	void	fileOpen();
+	void	drawModeChanged();
 	
-	void	frameChanged(int newFrameNr);
+	void	frameChanged(Frame *newFrame);
 
 
 private:
+
+	QString	getFileSize(qint64 size) const;
 
 	QSharedPointer<Sequence>	_sequence;
 	QGraphicsTextItem			*_noFileLoadedItem;

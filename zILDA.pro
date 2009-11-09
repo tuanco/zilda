@@ -22,6 +22,7 @@ RESOURCES += zilda.qrc
 TRANSLATIONS = zILDA_de.ts
 
 win32 {
+    RC_FILE = zilda_icon.rc
     CONFIG += embed_manifest_exe
     CONFIG(debug, debug|release) {    
         OBJECTS_DIR = build/debug

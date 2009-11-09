@@ -15,6 +15,7 @@
 
 Sequence::Sequence()
 : _currentFrame(_frames.end())
+, _drawMode(DrawModeNormal)
 {
 	_timer = QPointer<QTimer>(new QTimer());
 	connect(_timer.data(), SIGNAL(timeout()), this, SLOT(timerTriggered()));
@@ -26,20 +27,13 @@ Sequence::Sequence()
 Sequence::~Sequence()
 {
 	_timer->stop();
-
-	foreach(Frame *frame, _frames)
-	{
-		delete frame;
-	}
-
-	_frames.clear();
 }
 
 //=======================================================================================
 
-void Sequence::addFrame(Frame *frame)
+void Sequence::addFrame(const QSharedPointer<Frame>& frame)
 {
-	_frames.append(frame);
+	_frames.append(QSharedPointer<Frame>(frame));
 	_currentFrame = _frames.begin();
 }
 
@@ -47,7 +41,7 @@ void Sequence::addFrame(Frame *frame)
 
 Frame* Sequence::frame(int index)
 {
-	return _frames[index];
+	return _frames[index].data();
 }
 
 //=======================================================================================
@@ -63,7 +57,18 @@ void Sequence::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 					 QWidget *widget)
 {
 	if (_currentFrame != _frames.end())
-		(*_currentFrame)->paint(painter, option, widget);
+	{
+		switch (_drawMode)
+		{
+			case DrawModeNormal:
+				(*_currentFrame)->paintNormal(painter);
+				break;
+
+			case DrawModeDiagnostic:
+				(*_currentFrame)->paintDiagnostic(painter);
+				break;
+		}
+	}
 }
 
 //=======================================================================================
@@ -75,7 +80,7 @@ void Sequence::timerTriggered()
 	if (_currentFrame == _frames.end())
 		_currentFrame = _frames.begin();
 
-	emit frameChanged(_frames.indexOf(*_currentFrame));
+	emit frameChanged((*_currentFrame).data());
 
 	update();
 }
@@ -123,12 +128,18 @@ void Sequence::setActiveFrame(int nr)
 	if (nr >= _frames.count())
 		return;
 
-	if (_frames.indexOf(*_currentFrame) != nr)
+	if ((*_currentFrame)->frameNr() != nr)
 	{
 		_currentFrame = _frames.begin() + nr;
 		update();
-		emit frameChanged(nr);
+	emit frameChanged((*_currentFrame).data());
 	}
 }
 
 //=======================================================================================
+
+void Sequence::setDrawMode(DrawModes mode)
+{
+	_drawMode = mode;
+	update();
+}

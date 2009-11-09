@@ -15,6 +15,7 @@
 //=======================================================================================
 
 ReaderWriterILDA::ReaderWriterILDA()
+: _ildaVersion(-1)
 {
 	_currentPalette.clear();
 	
@@ -123,6 +124,8 @@ Sequence* ReaderWriterILDA::readFile(const QString& fileName)
 			quint8 formatType;
 			stream >> formatType;
 
+			_ildaVersion = qMax<int>(_ildaVersion, formatType);
+
 			switch (formatType)
 			{
 				case 0:
@@ -182,7 +185,8 @@ bool ReaderWriterILDA::readFrameSection(QDataStream& stream, bool is3DFrame)
 {
 	QString name, companyName;
 	quint16 entryCount, objectNumber, objectCount;
-	Frame *frame = new Frame();
+	QSharedPointer<Frame> frame = QSharedPointer<Frame>(new Frame(is3DFrame));
+	frame->setFrameNr(_sequence->frameCount());
 
 	readHeader(stream, name, companyName, entryCount, objectNumber, objectCount);
 
@@ -212,8 +216,6 @@ bool ReaderWriterILDA::readFrameSection(QDataStream& stream, bool is3DFrame)
 
 	if (entryCount > 0)
 		_sequence->addFrame(frame);
-	else
-		delete frame;
 
 	return entryCount == 0;
 }

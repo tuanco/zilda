@@ -25,6 +25,8 @@ public:
 
 	Sequence*	readFile(const QString& fileName);
 
+	int			version() const { return _ildaVersion; }
+
 
 private:
 	
@@ -34,7 +36,8 @@ private:
 					   QString& companyName, quint16& entryCount, 
 					   quint16& objectNumber, quint16& objectCount);
 
-	Sequence *_sequence;
+	Sequence		*_sequence;
 	QVector<QColor> _currentPalette;
 	QVector<QColor> _defaultIldaPalette;
+	int				_ildaVersion;
 };

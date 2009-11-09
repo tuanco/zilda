@@ -15,7 +15,10 @@
 
 //=======================================================================================
 
-Frame::Frame()
+Frame::Frame(bool is3D)
+: _nr(-1)
+, _numberOfVisiblePoints(0)
+, _is3D(is3D)
 {
 }
 
@@ -31,43 +34,57 @@ Frame::~Frame()
 void Frame::addPoint(const Point& point)
 {
 	_points.append(point);
+	if (!point.isBlanked())
+		_numberOfVisiblePoints++;
 }
 
 //=======================================================================================
 
-void Frame::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void Frame::paintNormal(QPainter *painter) const
 {
-	int i = 0;
-	int pointCount = _points.count();
-	
-	while (i < pointCount)
+	QList<Point>::const_iterator it = _points.begin();
+	QList<Point>::const_iterator endIt = _points.end();
+
+	while (it != endIt)
 	{
-		const Point& p = _points[i];
-		
-		if (!p.isBlanked())
+		if (!it->isBlanked())
 		{
+			QList<Point>::const_iterator p = it;
 			QPainterPath path;
-			painter->setPen(QPen(p.color()));
-			path.moveTo(p);
+			path.moveTo(*it);
 			
-			while (++i < pointCount && ! _points[i].isBlanked())
+			while (++it < endIt && !it->isBlanked() && p->color() == it->color())
 			{
-				//painter->setPen(QPen(_points[i].color()));
-				path.lineTo( _points[i]);
+				path.lineTo(*it);
 			}
 			
-			if (i < pointCount)
+			if (it < endIt)
 			{
-				//painter->setPen(QPen(_points[i].color()));
-				path.lineTo(_points[i]);
+				path.lineTo(*it);
 			}
 
+			painter->setPen(QPen(p->color()));
 			painter->drawPath(path);
 		}
 		else
-			i++;
+			it++;
 	}
-	
 }
 
 //=======================================================================================
+
+void Frame::paintDiagnostic(QPainter *painter) const
+{
+	paintNormal(painter);
+
+	const int CTRL_POINT_SIZE = 300;
+	foreach (const Point& p, _points)
+	{
+		if (!p.isBlanked())
+			painter->fillRect(p.x()-(CTRL_POINT_SIZE/2), 
+							  p.y()-(CTRL_POINT_SIZE/2), 
+							  CTRL_POINT_SIZE, 
+							  CTRL_POINT_SIZE, 
+							  p.color());
+	}
+}

@@ -23,15 +23,24 @@ class Sequence
 
 public:
 
+	enum DrawModes
+	{
+		DrawModeNormal,
+		DrawModeDiagnostic
+	};
+
 			Sequence();
 	virtual ~Sequence();
 
 	QRectF	boundingRect() const;
 	void	paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
-	void	addFrame(Frame *frame);
+	void	addFrame(const QSharedPointer<Frame>& frame);
 	int		frameCount() const { return _frames.count(); }
 	Frame*	frame(int index);
+
+	void		setDrawMode(DrawModes mode);
+	DrawModes	drawMode() const { return _drawMode; }
 
 
 public slots:
@@ -50,12 +59,13 @@ protected slots:
 
 signals:
 
-	void	frameChanged(int newFrameNr);
+	void	frameChanged(Frame *newFrame);
 
 
 private:
 
-	QVector<Frame*>				_frames;
-	QVector<Frame*>::iterator	_currentFrame;
-	QPointer<QTimer>			_timer;
+	QVector<QSharedPointer<Frame> >				_frames;
+	QVector<QSharedPointer<Frame> >::iterator	_currentFrame;
+	QPointer<QTimer>							_timer;
+	DrawModes									_drawMode;
 };
