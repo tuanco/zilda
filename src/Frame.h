@@ -20,6 +20,12 @@ class Frame
 	Q_PROPERTY(int frameNr READ frameNr WRITE setFrameNr)
 
 public:
+	
+	enum FrameFormat 
+	{
+		FF_3D,
+		FF_2D
+	};
 					Frame(bool is3D);
 	virtual			~Frame();
 
@@ -29,7 +35,7 @@ public:
 
 	int				visiblePointCount() const { return _numberOfVisiblePoints; }
 	int				hiddenPointCount() const { return _points.count() - _numberOfVisiblePoints; }
-	bool			is3D() const { return _is3D; }
+	FrameFormat		format() const { return _format; }
 
 	void			setFrameNr(int nr) { _nr = nr; }
 	int				frameNr() const { return _nr; }
@@ -42,5 +48,5 @@ private:
 	QList<Point> _points;
 	int			 _nr;
 	int			 _numberOfVisiblePoints;
-	bool		 _is3D;
+	FrameFormat	 _format;
 };

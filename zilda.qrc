@@ -1,7 +1,6 @@
 <RCC>
   <qresource>
     <file>data/zilda.png</file>
-    <file>data/zilda.svg</file>
     <file>data/icons/First.png</file>
     <file>data/icons/Last.png</file>
     <file>data/icons/Play.png</file>

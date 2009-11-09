@@ -119,9 +119,7 @@ Sequence* ReaderWriterILDA::readFile(const QString& fileName)
 				return 0L;
 			}
 
-			stream.skipRawData(3);
-
-			quint8 formatType;
+			quint32 formatType;
 			stream >> formatType;
 
 			_ildaVersion = qMax<int>(_ildaVersion, formatType);
@@ -145,6 +143,21 @@ Sequence* ReaderWriterILDA::readFile(const QString& fileName)
 				case 3:
 					// True Color
 					eof = readTrueColorSection(stream);
+					break;
+					
+				case 5:
+					eof = readFormat5(stream);
+					break;
+					
+				default:
+					// Unknow section type
+					{
+						qint32 dataLength;
+						qint32 numberOfPoints;
+						
+						stream >> dataLength >> numberOfPoints;
+						stream.skipRawData(dataLength);
+					}
 					break;
 			}
 
@@ -243,3 +256,28 @@ bool ReaderWriterILDA::readTrueColorSection(QDataStream& stream)
 	return numberOfPoints == 0;
 }
 
+bool ReaderWriterILDA::readFormat5(QDataStream& stream)
+{
+	QString name, companyName;
+	quint16 entryCount, objectNumber, objectCount;
+	QSharedPointer<Frame> frame = QSharedPointer<Frame>(new Frame(false));
+	frame->setFrameNr(_sequence->frameCount());
+	
+	readHeader(stream, name, companyName, entryCount, objectNumber, objectCount);
+	
+	for (quint16 i=0; i<entryCount; ++i)
+	{
+		qint16 x, y, z;
+		quint8 r, g, b, state;
+		
+		stream >> x >> y >> r >> g >> b >> state;
+		
+		Point p(QPointF(x, y), 0, QColor(r, g, b), (state & 64) == 64);
+		frame->addPoint(p);
+	}
+	
+	if (entryCount > 0)
+		_sequence->addFrame(frame);
+	
+	return entryCount == 0;
+}

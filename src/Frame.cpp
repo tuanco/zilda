@@ -18,8 +18,11 @@
 Frame::Frame(bool is3D)
 : _nr(-1)
 , _numberOfVisiblePoints(0)
-, _is3D(is3D)
 {
+	if (is3D)
+		_format = FF_3D;
+	else
+		_format = FF_2D;
 }
 
 //=======================================================================================

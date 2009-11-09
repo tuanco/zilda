@@ -30,6 +30,7 @@ public:
 
 private:
 	
+	bool	readFormat5(QDataStream& stream);
 	bool	readTrueColorSection(QDataStream& stream);
 	bool	readFrameSection(QDataStream& stream, bool is3DFrame);
 	void	readHeader(QDataStream& stream, QString& name, 

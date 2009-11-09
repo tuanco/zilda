@@ -121,7 +121,7 @@ void MainWindow::frameChanged(Frame *newFrame)
 	numberOfHiddenLinesLabel->setText(QString::number(newFrame->hiddenPointCount()));
 
 	QString frameFormat;
-	if (newFrame->is3D())
+	if (newFrame->format() == Frame::FF_3D)
 		frameFormat = "3D";
 	else
 		frameFormat = "2D";

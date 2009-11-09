@@ -42,6 +42,7 @@ win32 {
 macx {
 	QMAKE_MAC_SDK=/Developer/SDKs/MacOSX10.5.sdk
 	CONFIG += x86 x64
+	ICON = data/zilda.icns
     CONFIG(debug, debug|release) {
         OBJECTS_DIR = build/debug
         MOC_DIR = build/debug
