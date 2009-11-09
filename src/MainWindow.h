@@ -37,16 +37,10 @@ protected:
 protected slots:
 
 	void	fileOpen();
-	void	timerTriggered();
 
 
 private:
 
-	void	setSequence(Sequence *seq, int index);
-	
-	QTimer	*_timer;
-	int		_maxFrames;
-	int		_frame;
-	Sequence *_sequence;
-	QGraphicsTextItem *_noFileLoadedItem;
+	QSharedPointer<Sequence>	_sequence;
+	QGraphicsTextItem			*_noFileLoadedItem;
 };

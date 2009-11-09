@@ -1,24 +1,39 @@
+/*
+ *  Frame.cpp
+ *  zILDA
+ *
+ *  Created by Andre Normann on 05.11.09.
+ *  Copyright 2009 Andre Normann. All rights reserved.
+ *
+ */
+
+// Project
 #include "Frame.h"
 
+// Qt
 #include <QtGui>
+
+//=======================================================================================
 
 Frame::Frame()
 {
 }
 
+//=======================================================================================
+
 Frame::~Frame()
 {
+	_points.clear();
 }
+
+//=======================================================================================
 
 void Frame::addPoint(const Point& point)
 {
 	_points.append(point);
 }
 
-QRectF Frame::boundingRect() const
-{
-	return QRectF(65535.0f / 2.0f * -1.0f, 65535.0f / 2.0f * -1.0f, 65535.0f, 65535.0f);
-}
+//=======================================================================================
 
 void Frame::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
@@ -54,3 +69,5 @@ void Frame::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
 	}
 	
 }
+
+//=======================================================================================
