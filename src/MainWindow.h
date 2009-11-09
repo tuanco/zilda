@@ -37,6 +37,8 @@ protected:
 protected slots:
 
 	void	fileOpen();
+	
+	void	frameChanged(int newFrameNr);
 
 
 private:

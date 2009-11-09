@@ -40,7 +40,7 @@ Sequence::~Sequence()
 void Sequence::addFrame(Frame *frame)
 {
 	_frames.append(frame);
-	_currentFrame = _frames.end();
+	_currentFrame = _frames.begin();
 }
 
 //=======================================================================================
@@ -70,12 +70,65 @@ void Sequence::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 
 void Sequence::timerTriggered()
 {
+	_currentFrame++;
+	
 	if (_currentFrame == _frames.end())
 		_currentFrame = _frames.begin();
-	else
-		_currentFrame++;
+
+	emit frameChanged(_frames.indexOf(*_currentFrame));
 
 	update();
+}
+
+//=======================================================================================
+
+void Sequence::gotoFirstFrame()
+{
+	stopPlayback();
+	setActiveFrame(0);
+}
+
+//=======================================================================================
+
+void Sequence::gotoLastFrame()
+{
+	stopPlayback();
+	setActiveFrame(_frames.count()-1);
+}
+
+//=======================================================================================
+
+void Sequence::stopPlayback()
+{
+	if (!_timer.isNull())
+	{
+		_timer->stop();
+	}
+}
+
+//=======================================================================================
+
+void Sequence::startPlayback()
+{
+	if (!_timer.isNull() && !_timer->isActive())
+	{
+		_timer->start(42);
+	}
+}
+
+//=======================================================================================
+
+void Sequence::setActiveFrame(int nr)
+{
+	if (nr >= _frames.count())
+		return;
+
+	if (_frames.indexOf(*_currentFrame) != nr)
+	{
+		_currentFrame = _frames.begin() + nr;
+		update();
+		emit frameChanged(nr);
+	}
 }
 
 //=======================================================================================

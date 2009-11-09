@@ -52,7 +52,18 @@ void MainWindow::fileOpen()
 		if (fileInfo.exists())
 		{
 			ReaderWriterILDA reader;
+
 			_sequence = QSharedPointer<Sequence>(reader.readFile(fileName));
+
+			frameSlider->setRange(0, _sequence->frameCount()-1);
+			frameSlider->setSingleStep(1);
+
+			connect(_sequence.data(), SIGNAL(frameChanged(int)), this, SLOT(frameChanged(int)));
+			connect(firstFrameButton, SIGNAL(clicked()), _sequence.data(), SLOT(gotoFirstFrame()));
+			connect(lastFrameButton, SIGNAL(clicked()), _sequence.data(), SLOT(gotoLastFrame()));
+			connect(stopButton, SIGNAL(clicked()), _sequence.data(), SLOT(stopPlayback()));
+			connect(playButton, SIGNAL(clicked()), _sequence.data(), SLOT(startPlayback()));
+			connect(frameSlider, SIGNAL(valueChanged(int)), _sequence.data(), SLOT(setActiveFrame(int)));
 
 			QGraphicsScene *scene = new QGraphicsScene();
 			scene->addItem(_sequence.data());
@@ -77,6 +88,14 @@ void MainWindow::resizeEvent(QResizeEvent*)
 	matrix.scale(scalingFactor, -scalingFactor);
 	
 	graphicsView->setMatrix(matrix);	
+}
+
+//=======================================================================================
+
+void MainWindow::frameChanged(int newFrameNr)
+{
+	frameLabel->setText(QString::number(newFrameNr+1));
+	frameSlider->setSliderPosition(newFrameNr);
 }
 
 //=======================================================================================

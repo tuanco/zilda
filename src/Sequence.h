@@ -34,9 +34,23 @@ public:
 	Frame*	frame(int index);
 
 
+public slots:
+
+	void	gotoFirstFrame();
+	void	gotoLastFrame();
+	void	stopPlayback();
+	void	startPlayback();
+	void	setActiveFrame(int nr);
+
+
 protected slots:
 
 	void	timerTriggered();
+
+
+signals:
+
+	void	frameChanged(int newFrameNr);
 
 
 private:

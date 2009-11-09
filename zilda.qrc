@@ -1,0 +1,8 @@
+<RCC>
+  <qresource>
+    <file>data/icons/First.png</file>
+    <file>data/icons/Last.png</file>
+    <file>data/icons/Play.png</file>
+    <file>data/icons/Stop.png</file>
+  </qresource>
+</RCC>

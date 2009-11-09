@@ -17,7 +17,7 @@ SOURCES += src/main.cpp \
 			src/Sequence.cpp \
 			src/Point.cpp
 FORMS += src/MainWindow.ui
-#RESOURCES += resources.qrc
+RESOURCES += zilda.qrc
 
 TRANSLATIONS = zILDA_de.ts
 
