@@ -26,10 +26,16 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	frameSlider->setSingleStep(1);
 	
 	connect(actionOpen, SIGNAL(triggered()), this, SLOT(fileOpen()));
+	connect(actionPangolin_palette, SIGNAL(triggered()), SLOT(usePangolinPalette()));
+	connect(actionILDA_palette, SIGNAL(triggered()), SLOT(useILDAPalette()));
 	
 	QGraphicsScene *scene = new QGraphicsScene();
 	_noFileLoadedItem = scene->addText(tr("No ILDA sequence loaded"));		
 	graphicsView->setScene(scene);
+
+	_ildaPalette = loadPalette(":/data/ilda.palette");
+	_pangolinPalette = loadPalette(":/data/pangolin.palette");
+	_currentPalette = &_ildaPalette;
 }
 
 //=======================================================================================
@@ -57,11 +63,12 @@ void MainWindow::fileOpen()
 			ReaderWriterILDA reader;
 
 			_sequence = QSharedPointer<Sequence>(reader.readFile(fileName));
+			_sequence->setPalette(*_currentPalette);
 
 			// Fill file statistics
 			fileNameLabel->setText(fileInfo.fileName());
 			fileSizeLabel->setText(getFileSize(fileInfo.size()));
-			ildaFormatLabel->setText(QString::number(reader.version()));
+			ildaFormatLabel->setText(reader.version());
 			numberOfFramesLabel->setText(QString::number(_sequence->frameCount()));
 
 			// Set the current drawing mode (FIXME: Do not query the GUI for such infos)
@@ -101,6 +108,8 @@ void MainWindow::resizeEvent(QResizeEvent*)
 	qreal scalingFactor = (rect.height() < rect.width()) ? rect.height() : rect.width();
 	scalingFactor /= 65535.0;
 	
+	// Create a matrix to transform points from ILDA coordinate system 
+	// into screen coordinat system
 	QMatrix matrix;
 	matrix.translate(rect.center().x(), rect.center().y());
 	matrix.scale(scalingFactor, -scalingFactor);
@@ -151,3 +160,86 @@ QString	MainWindow::getFileSize(qint64 size) const
 
 	return QString::number(size) + tr(" B");
 }
+
+//=======================================================================================
+
+void MainWindow::usePangolinPalette()
+{
+	_currentPalette = &_pangolinPalette;
+	actionILDA_palette->setChecked(false);
+
+	if (!_sequence.isNull())
+	{
+		_sequence->setPalette(_pangolinPalette);
+		_sequence->update();
+	}
+}
+
+//=======================================================================================
+
+void MainWindow::useILDAPalette()
+{
+	_currentPalette = &_ildaPalette;
+	actionPangolin_palette->setChecked(false);
+
+	if (!_sequence.isNull())
+	{
+		_sequence->setPalette(_ildaPalette);
+		_sequence->update();
+	}
+}
+
+//=======================================================================================
+
+QVector<QColor> MainWindow::loadPalette(const QString& fileName) const
+{
+	QVector<QColor> pal;
+	QFile file(fileName);
+
+	if (file.open(QIODevice::ReadOnly))
+	{
+		QDataStream stream(&file);
+		stream.setByteOrder(QDataStream::BigEndian);
+
+		quint32 magic;
+		stream >> magic;
+		if (magic == 0x7A50414C)
+		{
+			quint32 version;
+			stream >> version;
+
+			if (version <= 1)
+			{
+				stream.setVersion(QDataStream::Qt_4_0);
+				stream >> pal;
+			}
+		}
+
+		file.close();
+	}
+
+	return pal;
+}
+
+//=======================================================================================
+
+bool MainWindow::savePalette(const QString& fileName, const QVector<QColor>& pal) const
+{
+	QFile file(fileName);
+
+	if (file.open(QIODevice::WriteOnly))
+	{
+		QDataStream stream(&file);
+		stream.setByteOrder(QDataStream::BigEndian);
+		stream << (quint32)0x7A50414C;
+		stream << (quint32)1;
+		stream.setVersion(QDataStream::Qt_4_0);
+		stream << pal;
+		file.close();
+		return true;
+	}
+
+	return false;
+}
+
+//=======================================================================================

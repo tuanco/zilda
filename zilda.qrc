@@ -1,5 +1,7 @@
 <RCC>
   <qresource>
+    <file>data/ilda.palette</file>
+    <file>data/pangolin.palette</file>
     <file>data/zilda.png</file>
     <file>data/icons/First.png</file>
     <file>data/icons/Last.png</file>

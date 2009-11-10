@@ -25,20 +25,20 @@ public:
 
 	Sequence*	readFile(const QString& fileName);
 
-	int			version() const { return _ildaVersion; }
+	QString		version() const;
 
 
 private:
 	
-	bool	readFormat5(QDataStream& stream);
+	bool	readFormat5(QDataStream& stream, bool is3DFrame);
 	bool	readTrueColorSection(QDataStream& stream);
 	bool	readFrameSection(QDataStream& stream, bool is3DFrame);
+	bool	readColorTable(QDataStream& stream);
 	void	readHeader(QDataStream& stream, QString& name, 
 					   QString& companyName, quint16& entryCount, 
 					   quint16& objectNumber, quint16& objectCount);
 
 	Sequence		*_sequence;
 	QVector<QColor> _currentPalette;
-	QVector<QColor> _defaultIldaPalette;
-	int				_ildaVersion;
+	QList<int>		_ildaVersion;
 };

@@ -39,14 +39,22 @@ protected slots:
 
 	void	fileOpen();
 	void	drawModeChanged();
+	void	usePangolinPalette();
+	void	useILDAPalette();
 	
 	void	frameChanged(Frame *newFrame);
 
 
 private:
 
-	QString	getFileSize(qint64 size) const;
+	QString			getFileSize(qint64 size) const;
+	QVector<QColor> loadPalette(const QString& fileName) const;
+	bool			savePalette(const QString& fileName, 
+								const QVector<QColor>& pal) const;
 
 	QSharedPointer<Sequence>	_sequence;
 	QGraphicsTextItem			*_noFileLoadedItem;
+	QVector<QColor>				_ildaPalette;
+	QVector<QColor>				_pangolinPalette;
+	QVector<QColor>				*_currentPalette;
 };

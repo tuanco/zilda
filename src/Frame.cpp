@@ -9,15 +9,17 @@
 
 // Project
 #include "Frame.h"
+#include "Sequence.h"
 
 // Qt
 #include <QtGui>
 
 //=======================================================================================
 
-Frame::Frame(bool is3D)
+Frame::Frame(Sequence *parent, bool is3D)
 : _nr(-1)
 , _numberOfVisiblePoints(0)
+, _parent(parent)
 {
 	if (is3D)
 		_format = FF_3D;
@@ -37,6 +39,7 @@ Frame::~Frame()
 void Frame::addPoint(const Point& point)
 {
 	_points.append(point);
+
 	if (!point.isBlanked())
 		_numberOfVisiblePoints++;
 }
@@ -45,32 +48,15 @@ void Frame::addPoint(const Point& point)
 
 void Frame::paintNormal(QPainter *painter) const
 {
-	QList<Point>::const_iterator it = _points.begin();
 	QList<Point>::const_iterator endIt = _points.end();
 
-	while (it != endIt)
+	for (QList<Point>::const_iterator it = _points.begin(); it < endIt-1; ++it)
 	{
-		if (!it->isBlanked())
+		if (!(it+1)->isBlanked())
 		{
-			QList<Point>::const_iterator p = it;
-			QPainterPath path;
-			path.moveTo(*it);
-			
-			while (++it < endIt && !it->isBlanked() && p->color() == it->color())
-			{
-				path.lineTo(*it);
-			}
-			
-			if (it < endIt)
-			{
-				path.lineTo(*it);
-			}
-
-			painter->setPen(QPen(p->color()));
-			painter->drawPath(path);
+			painter->setPen(QPen(penColor(*(it+1))));
+			painter->drawLine(*it, *(it+1));
 		}
-		else
-			it++;
 	}
 }
 
@@ -78,16 +64,59 @@ void Frame::paintNormal(QPainter *painter) const
 
 void Frame::paintDiagnostic(QPainter *painter) const
 {
-	paintNormal(painter);
+	QList<Point>::const_iterator endIt = _points.end();
 
-	const int CTRL_POINT_SIZE = 300;
+	for (QList<Point>::const_iterator it = _points.begin(); it < endIt-1; ++it)
+	{
+		if (!(it+1)->isBlanked())
+		{
+			painter->setPen(QPen(penColor(*(it+1))));
+			painter->drawLine(*it, *(it+1));
+		}
+		else
+		{
+			painter->setPen(QPen(Qt::lightGray));
+			painter->drawLine(*it, *(it+1));
+		}
+	}
+
+	const int CTRL_POINT_SIZE = 400;
 	foreach (const Point& p, _points)
 	{
+		QRectF rect(p.x()-(CTRL_POINT_SIZE/2), 
+					p.y()-(CTRL_POINT_SIZE/2), 
+					CTRL_POINT_SIZE, 
+					CTRL_POINT_SIZE);
+
 		if (!p.isBlanked())
-			painter->fillRect(p.x()-(CTRL_POINT_SIZE/2), 
-							  p.y()-(CTRL_POINT_SIZE/2), 
-							  CTRL_POINT_SIZE, 
-							  CTRL_POINT_SIZE, 
-							  p.color());
+		{
+			painter->fillRect(rect, penColor(p));
+		}
+		else
+		{
+			painter->fillRect(rect, Qt::lightGray);
+		}
 	}
+}
+
+//=======================================================================================
+
+QColor Frame::penColor(const Point& point) const
+{
+	if (point.color().isValid())
+	{
+		return point.color();
+	}
+	else if (_parent)
+	{
+		const QVector<QColor>& pal = _parent->palette();
+		quint8 index = point.colorIndex();
+
+		if (pal.empty())
+			return Qt::white;
+		else if (index < pal.count())
+			return pal.at(index);
+	}
+
+	return Qt::white;
 }

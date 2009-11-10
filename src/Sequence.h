@@ -42,6 +42,9 @@ public:
 	void		setDrawMode(DrawModes mode);
 	DrawModes	drawMode() const { return _drawMode; }
 
+	void					setPalette(const QVector<QColor>& pal) { _palette = pal; }
+	const QVector<QColor>&	palette() const { return _palette; }
+
 
 public slots:
 
@@ -68,4 +71,5 @@ private:
 	QVector<QSharedPointer<Frame> >::iterator	_currentFrame;
 	QPointer<QTimer>							_timer;
 	DrawModes									_drawMode;
+	QVector<QColor>								_palette;
 };

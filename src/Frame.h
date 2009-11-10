@@ -13,7 +13,10 @@
 #include <QList>
 #include <QGraphicsItem>
 
+// Project
 #include "Point.h"
+
+class Sequence;
 
 class Frame
 {
@@ -26,7 +29,7 @@ public:
 		FF_3D,
 		FF_2D
 	};
-					Frame(bool is3D);
+					Frame(Sequence *parent, bool is3D);
 	virtual			~Frame();
 
 	void			addPoint(const Point& point);
@@ -43,10 +46,14 @@ public:
 	void			paintNormal(QPainter *painter) const;
 	void			paintDiagnostic(QPainter *painter) const;
 
+
 private:
+
+	QColor			penColor(const Point& point) const;
 
 	QList<Point> _points;
 	int			 _nr;
 	int			 _numberOfVisiblePoints;
 	FrameFormat	 _format;
+	Sequence	 *_parent;
 };
