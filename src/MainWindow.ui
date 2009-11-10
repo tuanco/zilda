@@ -327,6 +327,9 @@
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
+    <property name="locale">
+     <locale language="C" country="AnyCountry"/>
+    </property>
     <property name="title">
      <string>File</string>
     </property>
@@ -335,19 +338,38 @@
     <addaction name="actionExit"/>
    </widget>
    <widget class="QMenu" name="menuPalette">
+    <property name="locale">
+     <locale language="C" country="AnyCountry"/>
+    </property>
     <property name="title">
      <string>Palette</string>
     </property>
     <addaction name="actionILDA_palette"/>
     <addaction name="actionPangolin_palette"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="locale">
+     <locale language="C" country="AnyCountry"/>
+    </property>
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <property name="separatorsCollapsible">
+     <bool>false</bool>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuPalette"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionExit">
    <property name="text">
     <string>Exit</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::QuitRole</enum>
    </property>
   </action>
   <action name="actionOpen">
@@ -375,6 +397,14 @@
    </property>
    <property name="text">
     <string>Pangolin palette</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About zILDA...</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::AboutRole</enum>
    </property>
   </action>
  </widget>

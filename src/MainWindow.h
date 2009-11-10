@@ -33,6 +33,7 @@ public:
 protected:
 
 	void	resizeEvent(QResizeEvent *event);
+	void	closeEvent(QCloseEvent *event);
 
 	
 protected slots:
@@ -41,6 +42,7 @@ protected slots:
 	void	drawModeChanged();
 	void	usePangolinPalette();
 	void	useILDAPalette();
+	void	about();
 	
 	void	frameChanged(Frame *newFrame);
 
@@ -51,6 +53,9 @@ private:
 	QVector<QColor> loadPalette(const QString& fileName) const;
 	bool			savePalette(const QString& fileName, 
 								const QVector<QColor>& pal) const;
+
+	void			writeSettings() const;
+	void			readSettings();
 
 	QSharedPointer<Sequence>	_sequence;
 	QGraphicsTextItem			*_noFileLoadedItem;

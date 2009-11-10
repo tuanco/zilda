@@ -14,6 +14,12 @@
 #include "MainWindow.h"
 #include "ReaderWriterILDA.h"
 #include "Frame.h"
+#include "AboutDialog.h"
+
+//=======================================================================================
+
+static QString CompanyName = "Andre Normann";
+static QString ProductName = "zILDA";
 
 //=======================================================================================
 
@@ -28,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	connect(actionOpen, SIGNAL(triggered()), this, SLOT(fileOpen()));
 	connect(actionPangolin_palette, SIGNAL(triggered()), SLOT(usePangolinPalette()));
 	connect(actionILDA_palette, SIGNAL(triggered()), SLOT(useILDAPalette()));
+	connect(actionAbout, SIGNAL(triggered()), SLOT(about()));
 	
 	QGraphicsScene *scene = new QGraphicsScene();
 	_noFileLoadedItem = scene->addText(tr("No ILDA sequence loaded"));		
@@ -36,6 +43,8 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	_ildaPalette = loadPalette(":/data/ilda.palette");
 	_pangolinPalette = loadPalette(":/data/pangolin.palette");
 	_currentPalette = &_ildaPalette;
+
+	readSettings();
 }
 
 //=======================================================================================
@@ -119,6 +128,14 @@ void MainWindow::resizeEvent(QResizeEvent*)
 
 //=======================================================================================
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+	writeSettings();
+	event->accept();
+}
+
+//=======================================================================================
+
 void MainWindow::frameChanged(Frame *newFrame)
 {
 	int newFrameNr = newFrame->frameNr();
@@ -167,6 +184,7 @@ void MainWindow::usePangolinPalette()
 {
 	_currentPalette = &_pangolinPalette;
 	actionILDA_palette->setChecked(false);
+	actionPangolin_palette->setChecked(true);
 
 	if (!_sequence.isNull())
 	{
@@ -180,6 +198,7 @@ void MainWindow::usePangolinPalette()
 void MainWindow::useILDAPalette()
 {
 	_currentPalette = &_ildaPalette;
+	actionILDA_palette->setChecked(true);
 	actionPangolin_palette->setChecked(false);
 
 	if (!_sequence.isNull())
@@ -240,6 +259,59 @@ bool MainWindow::savePalette(const QString& fileName, const QVector<QColor>& pal
 	}
 
 	return false;
+}
+
+//=======================================================================================
+
+void MainWindow::about()
+{
+	AboutDialog dlg(this);
+
+	dlg.exec();
+}
+
+//=======================================================================================
+
+void MainWindow::writeSettings() const
+{
+	QSettings settings(CompanyName, ProductName);
+
+	settings.beginGroup("MainWindow");
+	settings.setValue("size", size());
+    settings.setValue("pos", pos());	
+	settings.setValue("maximized", isMaximized());
+	settings.endGroup();
+
+	QString palette;
+	if (_currentPalette == &_ildaPalette)
+		palette = "ilda";
+	else if (_currentPalette == &_pangolinPalette)
+		palette = "pangolin";
+	settings.setValue("palette", palette);
+}
+
+//=======================================================================================
+
+void MainWindow::readSettings()
+{
+	QSettings settings(CompanyName, ProductName);
+
+	 settings.beginGroup("MainWindow");
+	 resize(settings.value("size", QSize(400, 400)).toSize());
+	 move(settings.value("pos", QPoint(200, 200)).toPoint());
+	 if (settings.value("maximized", false).toBool())
+		 showMaximized();
+	 settings.endGroup();
+
+	 QString palette = settings.value("palette", "ilda").toString();
+	 if (palette == "ilda")
+	 {
+		 useILDAPalette();
+	 }
+	 else if (palette == "pangolin")
+	 {
+		 usePangolinPalette();
+	 }
 }
 
 //=======================================================================================
