@@ -268,6 +268,7 @@ void MainWindow::about()
 	QString text;
 	text = tr(
 			  "<h3>About zILDA</h3>"
+              "<p>Version 0.1</p>"
 			  "<p>OpenSource ILDA file viewer</p>"
 			  "<p>Copyright (c) 2009 by Andre Normann</p>"
 			  "<a href=\"http://code.google.com/p/zilda/\"><span style=\"text-decoration: underline; color:#ffaa00;\">http://code.google.com/p/zilda/</span></a>"
