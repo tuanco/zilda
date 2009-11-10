@@ -8,18 +8,15 @@ HEADERS += src/MainWindow.h \
 			src/ReaderWriterILDA.h \
 			src/Frame.h \
 			src/Sequence.h \
-			src/Point.h \
-			src/AboutDialog.h
+			src/Point.h
 SOURCES += src/main.cpp \
 			src/MainWindow.cpp \
 			src/DarkStyle.cpp \
 			src/ReaderWriterILDA.cpp \
 			src/Frame.cpp \
 			src/Sequence.cpp \
-			src/Point.cpp \
-			src/AboutDialog.cpp
-FORMS += src/MainWindow.ui \
-      src/AboutDialog.ui
+			src/Point.cpp
+FORMS += src/MainWindow.ui
 RESOURCES += zilda.qrc
 
 TRANSLATIONS = zILDA_de.ts

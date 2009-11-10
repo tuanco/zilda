@@ -14,7 +14,6 @@
 #include "MainWindow.h"
 #include "ReaderWriterILDA.h"
 #include "Frame.h"
-#include "AboutDialog.h"
 
 //=======================================================================================
 
@@ -265,9 +264,15 @@ bool MainWindow::savePalette(const QString& fileName, const QVector<QColor>& pal
 
 void MainWindow::about()
 {
-	AboutDialog dlg(this);
-
-	dlg.exec();
+	
+	QString text;
+	text = tr(
+			  "<h3>About zILDA</h3>"
+			  "<p>OpenSource ILDA file viewer</p>"
+			  "<p>Copyright (c) 2009 by Andre Normann</p>"
+			  "<a href=\"http://code.google.com/p/zilda/\"><span style=\"text-decoration: underline; color:#ffaa00;\">http://code.google.com/p/zilda/</span></a>"
+			  );
+	QMessageBox::about(this, "About zILDA", text);
 }
 
 //=======================================================================================
