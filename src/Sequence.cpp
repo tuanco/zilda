@@ -17,16 +17,16 @@ Sequence::Sequence()
 : _currentFrame(_frames.end())
 , _drawMode(DrawModeNormal)
 {
-	_timer = QPointer<QTimer>(new QTimer());
-	connect(_timer.data(), SIGNAL(timeout()), this, SLOT(timerTriggered()));
-	_timer->start(42);
+	//_timer = QPointer<QTimer>(new QTimer());
+	//connect(_timer.data(), SIGNAL(timeout()), this, SLOT(timerTriggered()));
+	//_timer->start(42);
 }
 
 //=======================================================================================
 
 Sequence::~Sequence()
 {
-	_timer->stop();
+	//_timer->stop();
 }
 
 //=======================================================================================

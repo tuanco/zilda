@@ -16,7 +16,7 @@
 
 // Project
 #include "MainWindow.h"
-#include "DarkStyle.h"
+//#include "DarkStyle.h"
 
 //=======================================================================================
 
@@ -37,7 +37,26 @@
 int main(int argc, char** argv)
 {
 	QApplication app(argc, argv);
-	app.setStyle(new DarkStyle());
+	//app.setStyle(new DarkStyle());
+	
+	Q_INIT_RESOURCE(zilda);
+	
+	QPlastiqueStyle *style = new QPlastiqueStyle();
+	QApplication::setStyle(style);
+	
+	QPalette pal = app.palette();
+	pal.setColor(QPalette::Window, QColor(92, 92, 92));
+	pal.setColor(QPalette::WindowText, QColor(255, 255, 255));
+	pal.setColor(QPalette::Base, QColor(80, 80, 80));
+	pal.setColor(QPalette::AlternateBase, QColor(102, 102, 102));
+	pal.setColor(QPalette::Text, QColor(255, 255, 255));
+	pal.setColor(QPalette::Button, QColor(92, 92, 92));
+	pal.setColor(QPalette::ButtonText, QColor(255, 255, 255));
+	pal.setColor(QPalette::Light, QColor(122, 122, 122));
+	pal.setColor(QPalette::Midlight, QColor(122, 122, 122));
+	pal.setColor(QPalette::Mid, QColor(122, 122, 122));
+	pal.setColor(QPalette::Highlight, QColor(162, 162, 162));
+	app.setPalette(pal);
 	
 	QString locale(QLocale::system().name());
 	QTranslator translator;

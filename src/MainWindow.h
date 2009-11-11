@@ -17,6 +17,7 @@
 
 class Sequence;
 class Frame;
+class QTime;
 
 class MainWindow : 
 	public QMainWindow,
@@ -58,6 +59,7 @@ private:
 	void			readSettings();
 
 	QSharedPointer<Sequence>	_sequence;
+	QPointer<QTimeLine>			_timeLine;
 	QGraphicsTextItem			*_noFileLoadedItem;
 	QVector<QColor>				_ildaPalette;
 	QVector<QColor>				_pangolinPalette;
