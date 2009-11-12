@@ -13,6 +13,7 @@
 // Qt
 #include <QLayout>
 #include <QPushButton>
+#include <QToolButton>
 #include <QSlider>
 #include <QLabel>
 #include <QTimer>
@@ -52,19 +53,25 @@ TimeBar::TimeBar(QWidget *parent)
 	
 	_timeSnap = new TimeSnap(this);
 	
-	_playPause = new QPushButton(this);
-	_playPause->setText("Play");
-	_playPause->setFixedWidth(TIMEBAR_BUTWIDTH2);
+	_playPause = new QToolButton(this);
+    _playPause->setIcon(QIcon(QString::fromUtf8(":/data/icons/Play.png")));
+
+	_stop = new QToolButton(this);
+    _stop->setIcon(QIcon(QString::fromUtf8(":/data/icons/Stop.png")));
+
+	_first = new QToolButton(this);
+    _first->setIcon(QIcon(QString::fromUtf8(":/data/icons/First.png")));
 	
-	_stop = new QPushButton(this);
-	_stop->setText("Stop");
-	_stop->setFixedWidth(TIMEBAR_BUTWIDTH2);
+	_last = new QToolButton(this);
+    _last->setIcon(QIcon(QString::fromUtf8(":/data/icons/Last.png")));
 	
 	_layout->addWidget(_timePrev,   0, 0, 2, 1);
 	_layout->addWidget(_timeSnap,   0, 1, 2, 1);	
 	_layout->addWidget(_timeNext,   0, 2, 2, 1);	
-	_layout->addWidget(_playPause,  0, 3, 1, 1);	
-	_layout->addWidget(_stop,       1, 3, 1, 1);	
+	_layout->addWidget(_playPause,	0, 4);
+	_layout->addWidget(_stop,		0, 5);
+	_layout->addWidget(_first,		1, 4);
+	_layout->addWidget(_last,		1, 5);
 	
 	_timerNext = new QTimer(this);
 	_timerNext->setInterval(45);
@@ -80,11 +87,17 @@ TimeBar::TimeBar(QWidget *parent)
 	
 	_timerPlay = new QTimer(this);
 	_timerPlay->setInterval(15);
-	connect(_playPause, SIGNAL(clicked()), this, SLOT(playClicked()));
 	connect(_timerPlay, SIGNAL(timeout()), this, SLOT(playTimeout()));
-	
-	connect(_stop, SIGNAL(clicked()), this, SLOT(stopClicked()));
 	connect(_timeSnap, SIGNAL(timeChanged()), this, SLOT(snapChanged()));
+
+	connect(_playPause, SIGNAL(clicked()), SLOT(playClicked()));
+	connect(_stop, SIGNAL(clicked()), SLOT(stopClicked()));
+}
+
+//=======================================================================================
+
+TimeBar::~TimeBar()
+{
 }
 
 //=======================================================================================
@@ -98,7 +111,9 @@ void TimeBar::snapChanged()
 
 void TimeBar::nextClicked()
 {
-	_timeSnap->setStartSecs(_timeSnap->startSecs() + 1);
+	if (_timeSnap->endTime() > _timeSnap->startSecs() + 1)
+		_timeSnap->setStartSecs(_timeSnap->startSecs() + 1);
+
 	_timeSnap->repaint();
 	emit timeChanged();
 }
@@ -118,14 +133,22 @@ void TimeBar::prevClicked()
 
 void TimeBar::playClicked()
 {
+	QToolButton *btn = qobject_cast<QToolButton*>(sender());
+	QIcon icon;
+
 	if(_timerPlay->isActive())
 	{
-		_playPause->setText(tr("Play"));
+		icon.addFile(QString::fromUtf8(":/data/icons/Play.png"), QSize(), QIcon::Normal, QIcon::Off);
+		btn->setIcon(icon);
+
+		//_playPause->setText(tr("Play"));
 		_timerPlay->stop();
 	}
 	else
 	{
-		_playPause->setText(tr("Pause"));
+		icon.addFile(QString::fromUtf8(":/data/icons/Pause.png"), QSize(), QIcon::Normal, QIcon::Off);
+		btn->setIcon(icon);
+		//_playPause->setText(tr("Pause"));
 		_timerPlay->start();
 		_prevTime = QTime::currentTime();
 	}
@@ -143,7 +166,11 @@ void TimeBar::stopClicked()
 	
 	_timeSnap->repaint();
 	_timerPlay->stop();
-	_playPause->setText(tr("Play"));
+
+	//QIcon icon(;
+	//icon.addFile(QString::fromUtf8(":/data/icons/Play.png"), QSize(), QIcon::Normal, QIcon::Off);
+	_playPause->setIcon(QIcon(QString::fromUtf8(":/data/icons/Play.png")));
+
 	
 	emit timeChanged();
 }
@@ -172,6 +199,13 @@ void TimeBar::newTime()
 {
 	repaint();	
 	emit timeChanged();
+}
+
+//=======================================================================================
+
+void TimeBar::setRange(qreal startTime, qreal endTime)
+{
+	_timeSnap->setRange(startTime, endTime);
 }
 
 //=======================================================================================

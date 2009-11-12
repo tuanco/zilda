@@ -26,6 +26,7 @@ class QPushButton;
 class QTimeSnap;
 class QLabel;
 class QSlider;
+class QToolButton;
 
 //=======================================================================================
 
@@ -36,6 +37,9 @@ class TimeBar: public QWidget
 public:
 	
 			TimeBar(QWidget *parent=0);
+	virtual ~TimeBar();
+
+	void	setRange(qreal startTime, qreal endTime);
 	
 	void	snapTime();
 	qreal	demoTime() { return _demoTime; }
@@ -57,8 +61,10 @@ private:
 	TimeSnap	*_timeSnap;
 	QPushButton *_timePrev, 
 				*_timeNext;
-	QPushButton *_playPause, 
-				*_stop;
+	QToolButton *_playPause, 
+				*_stop,
+				*_first,
+				*_last;
 	QGridLayout *_layout;
 	QTimer      *_timerNext,
 				*_timerPrev, 

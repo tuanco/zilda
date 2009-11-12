@@ -15,12 +15,16 @@
 #include <QPainter>
 #include <QMouseEvent>
 
+#include <limits>
+
 //=======================================================================================
 
 TimeSnap::TimeSnap(TimeBar *parent) 
 : QWidget(parent)
 , _startSecs(0.0)
 , _timeBar(parent)
+, _startTime(0.0)
+, _endTime(std::numeric_limits<qreal>::max())
 {
 	_drag = false;
 	_timeVisualized = (qreal)((rect().width() + 10) / 40.9999); // each second is 40 pixel lenght (10 = 5 pixel spacing left+5pixel spacing right)
@@ -29,46 +33,68 @@ TimeSnap::TimeSnap(TimeBar *parent)
 
 //=======================================================================================
 
+TimeSnap::~TimeSnap()
+{
+}
+
+void TimeSnap::setRange(qreal startTime, qreal endTime)
+{
+	_startTime = startTime;
+	_endTime = endTime;
+}
+
+//=======================================================================================
+
 void TimeSnap::paintEvent(QPaintEvent *)
 {
 	QPainter painter(this);
 	QRect rc=rect();
+	QColor lineColor(119, 119, 119);
+	QColor textColor = palette().color(QPalette::WindowText);
 	
+	// Draw background
 	painter.setPen(QColor(80, 80, 80));
 	painter.drawRect(rc);
 	painter.fillRect(rc.adjusted(1, 1, -2, -2), QColor(92, 92, 92));
-    painter.setPen(QColor(149, 149, 149));
 	
 	qreal nSecs = (int)((rc.width() + 10) / 40.9999); // each second is 40 pixel lenght (10 = 5 pixel spacing left+5pixel spacing right)
+	nSecs = qMin(nSecs, _endTime);
 	_timeVisualized = nSecs;
 	
 	int startx = (int)((rc.width() - nSecs*40) / 2);
-	for(int i=0; i<=nSecs*10; i++)
+
+	for (int i=0; i<=nSecs*10; i++)
 	{
 		int curx = startx + i*4;
 		int endy = 10;
 		
 		if ((i % 10) == 0)
 			endy = 17;
+		else if ((i % 5) == 0)
+			endy = 13;
 		
+		painter.setPen(lineColor);
 		painter.drawLine(curx, 2, curx, endy);
 		
 		if (endy == 17)
 		{
 			QString tmp = QString::number((i / 10.0f) + _startSecs);
 			
-			painter.setPen(Qt::white);
-			painter.drawText(curx - 5, endy + 15, tmp);
-			painter.setPen(QColor(119, 119, 119));
+			painter.setPen(textColor);
+			painter.drawText(curx - 9, endy + 5, 20, 20, Qt::AlignHCenter | Qt::AlignTop, tmp);
 		}
 	}
-	
+
+	// Draw the current time marker
 	qreal demoTime = _timeBar->demoTime();
 	if (demoTime - _startSecs < nSecs+0.01 && 
 	    demoTime >= _startSecs)
 	{
 		int barx = (int)((_timeBar->demoTime() - _startSecs) * 40 + startx);
-		painter.setPen(Qt::red);
+		QPen pen(Qt::red);
+
+		pen.setWidth(2);
+		painter.setPen(pen);
 		painter.drawLine(barx, 2, barx, 17);
 	}
 }

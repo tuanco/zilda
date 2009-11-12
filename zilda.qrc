@@ -1,11 +1,12 @@
 <RCC>
-  <qresource>
-    <file>data/ilda.palette</file>
-    <file>data/pangolin.palette</file>
-    <file>data/zilda.png</file>
-    <file>data/icons/First.png</file>
-    <file>data/icons/Last.png</file>
-    <file>data/icons/Play.png</file>
-    <file>data/icons/Stop.png</file>
-  </qresource>
+    <qresource prefix="/" >
+        <file>data/ilda.palette</file>
+        <file>data/pangolin.palette</file>
+        <file>data/zilda.png</file>
+        <file>data/icons/First.png</file>
+        <file>data/icons/Last.png</file>
+        <file>data/icons/Play.png</file>
+        <file>data/icons/Stop.png</file>
+        <file>data/icons/Pause.png</file>
+    </qresource>
 </RCC>

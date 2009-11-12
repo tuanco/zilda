@@ -45,17 +45,29 @@ int main(int argc, char** argv)
 	QApplication::setStyle(style);
 	
 	QPalette pal = app.palette();
-	pal.setColor(QPalette::Window, QColor(92, 92, 92));
-	pal.setColor(QPalette::WindowText, QColor(255, 255, 255));
-	pal.setColor(QPalette::Base, QColor(80, 80, 80));
-	pal.setColor(QPalette::AlternateBase, QColor(102, 102, 102));
-	pal.setColor(QPalette::Text, QColor(255, 255, 255));
-	pal.setColor(QPalette::Button, QColor(92, 92, 92));
-	pal.setColor(QPalette::ButtonText, QColor(255, 255, 255));
+
+	pal.setColor(QPalette::Window, QColor(71, 71, 71));
+	pal.setColor(QPalette::Base, QColor(87, 87, 87));
+	pal.setColor(QPalette::Text, QColor(228, 228, 228));
+	pal.setColor(QPalette::HighlightedText, QColor(38, 38, 39));
+	pal.setColor(QPalette::ButtonText, QColor(228, 228, 228));
+	pal.setColor(QPalette::Highlight, QColor(160, 160, 160));
+	pal.setColor(QPalette::WindowText, QColor(220, 220, 220));
+	pal.setColor(QPalette::Mid, QColor(50, 50, 50));
+	pal.setColor(QPalette::Midlight, QColor(85, 85, 85));
+	pal.setColor(QPalette::Button, QColor(67, 67, 67));
+	pal.setColor(QPalette::Dark, QColor(10, 10, 10));
 	pal.setColor(QPalette::Light, QColor(122, 122, 122));
-	pal.setColor(QPalette::Midlight, QColor(122, 122, 122));
-	pal.setColor(QPalette::Mid, QColor(122, 122, 122));
-	pal.setColor(QPalette::Highlight, QColor(162, 162, 162));
+	pal.setColor(QPalette::Shadow, QColor(38, 38, 38));
+	
+	pal.setColor(QPalette::Disabled, QPalette::Text, pal.color(QPalette::Active, QPalette::Text).dark());
+	pal.setColor(QPalette::Disabled, QPalette::Highlight, pal.color(QPalette::Active, QPalette::Text).dark());
+	pal.setColor(QPalette::Disabled, QPalette::Shadow, pal.color(QPalette::Active, QPalette::Text).dark());
+	pal.setColor(QPalette::Disabled, QPalette::Light, pal.color(QPalette::Active, QPalette::Text).dark());
+	pal.setColor(QPalette::Disabled, QPalette::Midlight, pal.color(QPalette::Active, QPalette::Text).dark());
+	pal.setColor(QPalette::Disabled, QPalette::Dark, pal.color(QPalette::Active, QPalette::Text).dark());
+	pal.setColor(QPalette::Disabled, QPalette::Mid, pal.color(QPalette::Active, QPalette::Text).dark());
+
 	app.setPalette(pal);
 	
 	QString locale(QLocale::system().name());

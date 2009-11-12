@@ -4,7 +4,6 @@ TEMPLATE = app
 TARGET = zILDA
 
 HEADERS += src/MainWindow.h \
-			src/DarkStyle.h \
 			src/ReaderWriterILDA.h \
 			src/Frame.h \
 			src/Sequence.h \
@@ -13,7 +12,6 @@ HEADERS += src/MainWindow.h \
 			src/TimeBar.h
 SOURCES += src/main.cpp \
 			src/MainWindow.cpp \
-			src/DarkStyle.cpp \
 			src/ReaderWriterILDA.cpp \
 			src/Frame.cpp \
 			src/Sequence.cpp \

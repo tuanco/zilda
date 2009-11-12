@@ -87,12 +87,13 @@ void MainWindow::fileOpen()
 
 			// Setup frame slider
 			frameSlider->setRange(0, _sequence->frameCount()-1);
+			_timeBar->setRange(0, _sequence->frameCount() * 40 / 1000);
 			
-			_timeLine = new QTimeLine(42 * _sequence->frameCount(), this);
+			_timeLine = new QTimeLine(40 * _sequence->frameCount(), this);
 			_timeLine->setFrameRange(0, _sequence->frameCount()-1);
 			_timeLine->setCurveShape(QTimeLine::LinearCurve);
 			_timeLine->setLoopCount(0);
-			connect(_timeLine, SIGNAL(frameChanged(int)), frameSlider, SLOT(setValue(int)));
+			connect(_timeLine, SIGNAL(frameChanged(int)), _sequence.data(), SLOT(setActiveFrame(int)));
 
 			// Build the connections
 			connect(_sequence.data(), SIGNAL(frameChanged(Frame*)), this, SLOT(frameChanged(Frame*)));

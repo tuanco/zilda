@@ -17,12 +17,18 @@
    <iconset resource="../zilda.qrc">
     <normaloff>:/data/zilda.png</normaloff>:/data/zilda.png</iconset>
   </property>
+  <property name="locale">
+   <locale language="C" country="AnyCountry"/>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_2">
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>
        <widget class="QGraphicsView" name="graphicsView">
+        <property name="locale">
+         <locale language="C" country="AnyCountry"/>
+        </property>
         <property name="verticalScrollBarPolicy">
          <enum>Qt::ScrollBarAlwaysOff</enum>
         </property>
@@ -53,7 +59,7 @@
        </widget>
       </item>
       <item>
-       <widget class="TimeBar" name="widget_2" native="true">
+       <widget class="TimeBar" name="_timeBar" native="true">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -340,7 +346,7 @@
      <x>0</x>
      <y>0</y>
      <width>647</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
