@@ -58,7 +58,7 @@ void TimeSnap::paintEvent(QPaintEvent *)
 	painter.fillRect(rc.adjusted(1, 1, -2, -2), QColor(92, 92, 92));
 	
 	qreal nSecs = (int)((rc.width() + 10) / 40.9999); // each second is 40 pixel lenght (10 = 5 pixel spacing left+5pixel spacing right)
-	nSecs = qMin(nSecs, _endTime);
+	//nSecs = qMin(nSecs, _endTime);
 	_timeVisualized = nSecs;
 	
 	int startx = (int)((rc.width() - nSecs*40) / 2);
@@ -78,10 +78,17 @@ void TimeSnap::paintEvent(QPaintEvent *)
 		
 		if (endy == 17)
 		{
-			QString tmp = QString::number((i / 10.0f) + _startSecs);
+			int time = (i / 10.0f) + _startSecs;
+			int minutes = (time / 60);
+			int seconds = (time % 60);
+
+			QString tmp;
+			tmp.sprintf("%02d:%02d", minutes, seconds);
+
+			QRect rect = painter.fontMetrics().boundingRect(tmp);
 			
 			painter.setPen(textColor);
-			painter.drawText(curx - 9, endy + 5, 20, 20, Qt::AlignHCenter | Qt::AlignTop, tmp);
+			painter.drawText(curx - (rect.width() / 2), endy + 5, rect.width(), rect.height(), Qt::AlignCenter, tmp);
 		}
 	}
 
