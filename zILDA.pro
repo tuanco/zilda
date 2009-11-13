@@ -8,7 +8,7 @@ HEADERS += src/MainWindow.h \
 			src/Frame.h \
 			src/Sequence.h \
 			src/Point.h \
-			src/TimeSnap.h \
+			src/TimeRuler.h \
 			src/TimeBar.h
 SOURCES += src/main.cpp \
 			src/MainWindow.cpp \
@@ -16,7 +16,7 @@ SOURCES += src/main.cpp \
 			src/Frame.cpp \
 			src/Sequence.cpp \
 			src/Point.cpp \
-			src/TimeSnap.cpp \
+			src/TimeRuler.cpp \
 			src/TimeBar.cpp
 FORMS += src/MainWindow.ui
 RESOURCES += zilda.qrc

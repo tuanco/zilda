@@ -64,4 +64,6 @@ private:
 	QVector<QColor>				_ildaPalette;
 	QVector<QColor>				_pangolinPalette;
 	QVector<QColor>				*_currentPalette;
+	QString						_lastDirectory;
+	bool						_isMaximized;
 };

@@ -70,13 +70,15 @@ int main(int argc, char** argv)
 
 	app.setPalette(pal);
 	
+	app.setStyleSheet("QWidget { color: #e4e4e4 }");
+	
 	QString locale(QLocale::system().name());
 	QTranslator translator;
 	translator.load(QString("zILDA_") + locale);
 	app.installTranslator(&translator);
 	
 	MainWindow *mainWindow = new MainWindow();
-	mainWindow->show();
+	mainWindow->show();	
 
 	return app.exec();
 }

@@ -8,18 +8,19 @@
  */
 
 // Project
-#include "TimeSnap.h"
+#include "TimeRuler.h"
 #include "TimeBar.h"
 
 // Qt
 #include <QPainter>
 #include <QMouseEvent>
+#include <QtGui>
 
 #include <limits>
 
 //=======================================================================================
 
-TimeSnap::TimeSnap(TimeBar *parent) 
+TimeRuler::TimeRuler(TimeBar *parent) 
 : QWidget(parent)
 , _startSecs(0.0)
 , _timeBar(parent)
@@ -33,11 +34,11 @@ TimeSnap::TimeSnap(TimeBar *parent)
 
 //=======================================================================================
 
-TimeSnap::~TimeSnap()
+TimeRuler::~TimeRuler()
 {
 }
 
-void TimeSnap::setRange(qreal startTime, qreal endTime)
+void TimeRuler::setRange(qreal startTime, qreal endTime)
 {
 	_startTime = startTime;
 	_endTime = endTime;
@@ -45,12 +46,14 @@ void TimeSnap::setRange(qreal startTime, qreal endTime)
 
 //=======================================================================================
 
-void TimeSnap::paintEvent(QPaintEvent *)
+void TimeRuler::paintEvent(QPaintEvent *)
 {
 	QPainter painter(this);
+	QPalette pal = palette();
 	QRect rc=rect();
 	QColor lineColor(119, 119, 119);
-	QColor textColor = palette().color(QPalette::WindowText);
+	QColor textColor = pal.color(QPalette::WindowText);
+	QFont font("Arial", 10);
 	
 	// Draw background
 	painter.setPen(QColor(80, 80, 80));
@@ -88,7 +91,8 @@ void TimeSnap::paintEvent(QPaintEvent *)
 			QRect rect = painter.fontMetrics().boundingRect(tmp);
 			
 			painter.setPen(textColor);
-			painter.drawText(curx - (rect.width() / 2), endy + 5, rect.width(), rect.height(), Qt::AlignCenter, tmp);
+			painter.setFont(font);
+			painter.drawText(curx - (rect.width() / 2), endy + 3, rect.width(), rect.height(), Qt::AlignHCenter | Qt::AlignTop, tmp);
 		}
 	}
 
@@ -108,40 +112,50 @@ void TimeSnap::paintEvent(QPaintEvent *)
 
 //=======================================================================================
 
-void TimeSnap::mousePressEvent(QMouseEvent *ev)
+void TimeRuler::mousePressEvent(QMouseEvent *ev)
 {
-	_drag = true;
-	mouseMoveEvent(ev);
-}
-
-//=======================================================================================
-
-void TimeSnap::mouseReleaseEvent(QMouseEvent *)
-{
-	_drag = false;
-}
-
-//=======================================================================================
-
-void TimeSnap::mouseMoveEvent(QMouseEvent *ev)
-{
-	QRect rc = rect();
-	int nSecs = (int)((rc.width() + 10) / 40.9999); // each second is 40 pixel lenght (10 = 5 pixel spacing left+5pixel spacing right)
-	int startx = (int)((rc.width() - nSecs*40) / 2) - 1;
-	
-	if (_drag && 
-		ev->pos().x() > startx && 
-		ev->pos().x() < rc.width()-startx)
+	if (ev->button() & Qt::LeftButton)
 	{
-		qreal time = (ev->pos().x() - startx) / 40.0 + _startSecs;
+		_drag = true;
+		mouseMoveEvent(ev);
+	}
+}
+
+//=======================================================================================
+
+void TimeRuler::mouseReleaseEvent(QMouseEvent *ev)
+{
+	if (ev->button() & Qt::LeftButton)
+	{
+		_drag = false;
+	}
+}
+
+//=======================================================================================
+
+void TimeRuler::mouseMoveEvent(QMouseEvent *ev)
+{
+	if (ev->button() & Qt::LeftButton)
+	{
+		QRect rc = rect();
+		qreal nSecs = (int)((rc.width() + 10) / 40.9999); // each second is 40 pixel lenght (10 = 5 pixel spacing left+5pixel spacing right)
+		//nSecs = qMin(nSecs, _endTime);
+		int startx = (int)((rc.width() - nSecs*40) / 2) - 1;
 		
-		// small hack to fix some float<->int rounding in coordinate
-		if(_timeBar->demoTime() > _startSecs+nSecs)
-			time = _startSecs + nSecs;
-		
-		_timeBar->setDemoTime(time);
-		emit timeChanged();
-		repaint();
+		if (_drag && 
+			ev->pos().x() > startx && 
+			ev->pos().x() < rc.width()-startx)
+		{
+			qreal time = (ev->pos().x() - startx) / 40.0 + _startSecs;
+			
+			// small hack to fix some float<->int rounding in coordinate
+			if(_timeBar->demoTime() > _startSecs+nSecs)
+				time = _startSecs + nSecs;
+			
+			_timeBar->setDemoTime(time);
+			emit timeChanged();
+			repaint();
+		}
 	}
 }
 

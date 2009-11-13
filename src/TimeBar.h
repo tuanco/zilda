@@ -17,7 +17,7 @@
 #include <QDateTime>
 
 // Project
-#include "TimeSnap.h"
+#include "TimeRuler.h"
 
 //=======================================================================================
 
@@ -42,9 +42,9 @@ public:
 	void	setRange(qreal startTime, qreal endTime);
 	
 	void	snapTime();
-	qreal	demoTime() { return _demoTime; }
+	qreal	demoTime() const { return _demoTime; }
 	void	setDemoTime(qreal time) { _demoTime = time; }
-	qreal	startTime() { return _timeSnap->startSecs(); }
+	qreal	startTime() { return _timeRuler->startSecs(); }
 	
 	bool	snapFollow() { return _snapFollow; }
 	void	setSnapFollow(bool snapFollow) { _snapFollow = snapFollow; }
@@ -58,7 +58,7 @@ private:
 	bool _isPlaying;
 	QTime _prevTime;
 	
-	TimeSnap	*_timeSnap;
+	TimeRuler	*_timeRuler;
 	QPushButton *_timePrev, 
 				*_timeNext;
 	QToolButton *_playPause, 

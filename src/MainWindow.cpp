@@ -24,6 +24,7 @@ static QString ProductName = "zILDA";
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 : QMainWindow(parent, flags)
+, _isMaximized(false)
 {
 	setupUi(this);
 
@@ -58,7 +59,7 @@ void MainWindow::fileOpen()
 {
 	QString fileName = QFileDialog::getOpenFileName(this, 
 													tr("Open ILDA file"), 
-													"", 
+													_lastDirectory, 
 													tr("ILDA files (*.ild);;All files (*.*)"));
 	QFileInfo fileInfo(fileName);
 	
@@ -68,6 +69,8 @@ void MainWindow::fileOpen()
 
 		_sequence = QSharedPointer<Sequence>(reader.readFile(fileName));
 		_sequence->setPalette(*_currentPalette);
+		
+		_lastDirectory = fileInfo.absoluteFilePath();
 
 		// Fill file statistics
 		fileNameLabel->setText(fileInfo.fileName());
@@ -287,7 +290,8 @@ void MainWindow::writeSettings() const
 	settings.beginGroup("MainWindow");
 	settings.setValue("size", size());
     settings.setValue("pos", pos());	
-	settings.setValue("maximized", isMaximized());
+	settings.setValue("maximized", _isMaximized);
+	settings.setValue("lastDirectory", _lastDirectory);
 	settings.endGroup();
 
 	QString palette;
@@ -309,6 +313,7 @@ void MainWindow::readSettings()
 	 move(settings.value("pos", QPoint(200, 200)).toPoint());
 	 if (settings.value("maximized", false).toBool())
 		 showMaximized();
+	_lastDirectory = settings.value("lastDirectory", "").toString();
 	 settings.endGroup();
 
 	 QString palette = settings.value("palette", "ilda").toString();

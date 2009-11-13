@@ -19,14 +19,14 @@ class TimeBar;
 
 //=======================================================================================
 
-class TimeSnap : public QWidget
+class TimeRuler : public QWidget
 {
 	Q_OBJECT
 	
 public:
 	
-			TimeSnap(TimeBar *parent=0);
-	virtual ~TimeSnap();
+			TimeRuler(TimeBar *parent=0);
+	virtual ~TimeRuler();
 
 	void	setRange(qreal startTime, qreal endTime);
 	qreal	startTime() const { return _startTime; }
