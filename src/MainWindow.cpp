@@ -56,62 +56,57 @@ MainWindow::~MainWindow()
 
 void MainWindow::fileOpen()
 {
-	QFileDialog ofd(this, tr("Open ILDA file"), "");
-	ofd.setFileMode(QFileDialog::AnyFile);
-	ofd.setFilter(tr("ILDA files (*.ild);;All files (*.*)"));
-	ofd.setViewMode(QFileDialog::Detail);
+	QString fileName = QFileDialog::getOpenFileName(this, 
+													tr("Open ILDA file"), 
+													"", 
+													tr("ILDA files (*.ild);;All files (*.*)"));
+	QFileInfo fileInfo(fileName);
 	
-	if (ofd.exec())
+	if (fileInfo.exists())
 	{
-		QString fileName = ofd.selectedFiles().at(0);
-		QFileInfo fileInfo(fileName);
+		ReaderWriterILDA reader;
+
+		_sequence = QSharedPointer<Sequence>(reader.readFile(fileName));
+		_sequence->setPalette(*_currentPalette);
+
+		// Fill file statistics
+		fileNameLabel->setText(fileInfo.fileName());
+		fileSizeLabel->setText(getFileSize(fileInfo.size()));
+		ildaFormatLabel->setText(reader.version());
+		numberOfFramesLabel->setText(QString::number(_sequence->frameCount()));
+
+		// Set the current drawing mode (FIXME: Do not query the GUI for such infos)
+		if (normalRadioButton->isChecked())
+			_sequence->setDrawMode(Sequence::DrawModeNormal);
+		else if (diagnosticRadioButton->isChecked())
+			_sequence->setDrawMode(Sequence::DrawModeDiagnostic);
+
+		// Setup frame slider
+		frameSlider->setRange(0, _sequence->frameCount()-1);
+		_timeBar->setRange(0, _sequence->frameCount() * 40 / 1000);
 		
-		if (fileInfo.exists())
-		{
-			ReaderWriterILDA reader;
+		_timeLine = new QTimeLine(40 * _sequence->frameCount(), this);
+		_timeLine->setFrameRange(0, _sequence->frameCount()-1);
+		_timeLine->setCurveShape(QTimeLine::LinearCurve);
+		_timeLine->setLoopCount(0);
+		connect(_timeLine, SIGNAL(frameChanged(int)), _sequence.data(), SLOT(setActiveFrame(int)));
 
-			_sequence = QSharedPointer<Sequence>(reader.readFile(fileName));
-			_sequence->setPalette(*_currentPalette);
+		// Build the connections
+		connect(_sequence.data(), SIGNAL(frameChanged(Frame*)), this, SLOT(frameChanged(Frame*)));
+		connect(firstFrameButton, SIGNAL(clicked()), _sequence.data(), SLOT(gotoFirstFrame()));
+		connect(lastFrameButton, SIGNAL(clicked()), _sequence.data(), SLOT(gotoLastFrame()));
+		connect(stopButton, SIGNAL(clicked()), _timeLine, SLOT(stop()));
+		connect(playButton, SIGNAL(clicked()), _timeLine, SLOT(start()));
+		connect(frameSlider, SIGNAL(valueChanged(int)), _sequence.data(), SLOT(setActiveFrame(int)));
+		connect(normalRadioButton, SIGNAL(clicked()), this, SLOT(drawModeChanged()));
+		connect(diagnosticRadioButton, SIGNAL(clicked()), this, SLOT(drawModeChanged()));
 
-			// Fill file statistics
-			fileNameLabel->setText(fileInfo.fileName());
-			fileSizeLabel->setText(getFileSize(fileInfo.size()));
-			ildaFormatLabel->setText(reader.version());
-			numberOfFramesLabel->setText(QString::number(_sequence->frameCount()));
+		QGraphicsScene *scene = new QGraphicsScene();
+		scene->addItem(_sequence.data());
+		graphicsView->setScene(scene);
 
-			// Set the current drawing mode (FIXME: Do not query the GUI for such infos)
-			if (normalRadioButton->isChecked())
-				_sequence->setDrawMode(Sequence::DrawModeNormal);
-			else if (diagnosticRadioButton->isChecked())
-				_sequence->setDrawMode(Sequence::DrawModeDiagnostic);
-
-			// Setup frame slider
-			frameSlider->setRange(0, _sequence->frameCount()-1);
-			_timeBar->setRange(0, _sequence->frameCount() * 40 / 1000);
-			
-			_timeLine = new QTimeLine(40 * _sequence->frameCount(), this);
-			_timeLine->setFrameRange(0, _sequence->frameCount()-1);
-			_timeLine->setCurveShape(QTimeLine::LinearCurve);
-			_timeLine->setLoopCount(0);
-			connect(_timeLine, SIGNAL(frameChanged(int)), _sequence.data(), SLOT(setActiveFrame(int)));
-
-			// Build the connections
-			connect(_sequence.data(), SIGNAL(frameChanged(Frame*)), this, SLOT(frameChanged(Frame*)));
-			connect(firstFrameButton, SIGNAL(clicked()), _sequence.data(), SLOT(gotoFirstFrame()));
-			connect(lastFrameButton, SIGNAL(clicked()), _sequence.data(), SLOT(gotoLastFrame()));
-			connect(stopButton, SIGNAL(clicked()), _timeLine, SLOT(stop()));
-			connect(playButton, SIGNAL(clicked()), _timeLine, SLOT(start()));
-			connect(frameSlider, SIGNAL(valueChanged(int)), _sequence.data(), SLOT(setActiveFrame(int)));
-			connect(normalRadioButton, SIGNAL(clicked()), this, SLOT(drawModeChanged()));
-			connect(diagnosticRadioButton, SIGNAL(clicked()), this, SLOT(drawModeChanged()));
-
-			QGraphicsScene *scene = new QGraphicsScene();
-			scene->addItem(_sequence.data());
-			graphicsView->setScene(scene);
-
-			// FIXME: Need to call this until a resize event happens.
-			resizeEvent(NULL);
-		}
+		// FIXME: Need to call this until a resize event happens.
+		resizeEvent(NULL);
 	}
 }
 
