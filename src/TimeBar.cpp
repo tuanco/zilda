@@ -17,7 +17,8 @@
 #include <QSlider>
 #include <QLabel>
 #include <QTimer>
-
+#include <QTimeLine>
+#include <QtGui>
 
 //=======================================================================================
 
@@ -30,10 +31,10 @@
 
 TimeBar::TimeBar(QWidget *parent) 
 : QWidget(parent)
-, _demoTime(0.0)
 , _isPlaying(true)
+, _timeLine(new QTimeLine())
 {
-	_snapFollow = false; 
+	_snapFollow = true; 
 	
 	setFixedHeight(TIMEBAR_HEIGHT);
 	
@@ -85,13 +86,12 @@ TimeBar::TimeBar(QWidget *parent)
 	connect(_timePrev, SIGNAL(released()), _timerPrev, SLOT(stop()));
 	connect(_timerPrev, SIGNAL(timeout()), this, SLOT(prevClicked()));
 	
-	_timerPlay = new QTimer(this);
-	_timerPlay->setInterval(15);
-	connect(_timerPlay, SIGNAL(timeout()), this, SLOT(playTimeout()));
 	connect(_timeRuler, SIGNAL(timeChanged()), this, SLOT(snapChanged()));
-
 	connect(_playPause, SIGNAL(clicked()), SLOT(playClicked()));
-	connect(_stop, SIGNAL(clicked()), SLOT(stopClicked()));
+	connect(_stop, SIGNAL(clicked()), SLOT(stopClicked()));	
+	connect(_first, SIGNAL(clicked()), SLOT(firstClicked()));
+	connect(_last, SIGNAL(clicked()), SLOT(lastClicked()));
+	connect(_timeLine, SIGNAL(valueChanged(qreal)), SLOT(playTimeout(qreal)));
 }
 
 //=======================================================================================
@@ -111,7 +111,8 @@ void TimeBar::snapChanged()
 
 void TimeBar::nextClicked()
 {
-	if (_timeRuler->endTime() > _timeRuler->startSecs() + 1)
+//	qDebug() << "endTime = " << _timeRuler->endTime() << ", endSecs" << _timeRuler->startSecs() + _timeRuler->timeVisualized();
+	if (_timeRuler->endTime() > _timeRuler->startSecs() + 1 + _timeRuler->timeVisualized())
 		_timeRuler->setStartSecs(_timeRuler->startSecs() + 1);
 
 	_timeRuler->repaint();
@@ -136,18 +137,17 @@ void TimeBar::playClicked()
 	QToolButton *btn = qobject_cast<QToolButton*>(sender());
 	QIcon icon;
 
-	if(_timerPlay->isActive())
+	if (_timeLine->state() == QTimeLine::Running)
 	{
 		icon.addFile(QString::fromUtf8(":/data/icons/Play.png"), QSize(), QIcon::Normal, QIcon::Off);
 		btn->setIcon(icon);
-		_timerPlay->stop();
+		_timeLine->stop();
 	}
 	else
 	{
 		icon.addFile(QString::fromUtf8(":/data/icons/Pause.png"), QSize(), QIcon::Normal, QIcon::Off);
 		btn->setIcon(icon);
-		_timerPlay->start();
-		_prevTime = QTime::currentTime();
+		_timeLine->start();
 	}
 	
 	_timeRuler->repaint();
@@ -159,10 +159,10 @@ void TimeBar::playClicked()
 
 void TimeBar::stopClicked()
 {
-	setDemoTime(0);
+	_timeLine->stop();
+	_timeLine->setCurrentTime(0);
 	
 	_timeRuler->repaint();
-	_timerPlay->stop();
 
 	_playPause->setIcon(QIcon(QString::fromUtf8(":/data/icons/Play.png")));
 
@@ -172,19 +172,20 @@ void TimeBar::stopClicked()
 
 //=======================================================================================
 
-void TimeBar::playTimeout()
+void TimeBar::playTimeout(qreal value)
 {
-	QTime curTime = QTime::currentTime();
-	qreal demoTime = _prevTime.msecsTo(curTime)/1000.0 + _demoTime;
-	
 	if (_snapFollow && 
-		demoTime > _timeRuler->startSecs() + _timeRuler->timeVisualized())
+		value * _timeLine->duration() / 1000.0 > _timeRuler->startSecs() + _timeRuler->timeVisualized())
+	{
 		_timeRuler->setStartSecs(_timeRuler->startSecs() + (int)(_timeRuler->timeVisualized()*0.75));
-	
-	setDemoTime(demoTime);
-	
+	}
+	/* else if (_snapFollow &&
+			 value * _timeLine->duration() / 1000.0 < _timeRuler->startSecs() + _timeRuler->timeVisualized())
+	{
+		_timeRuler->setStartSecs(_timeRuler->startSecs() - (int)(_timeRuler->timeVisualized()*0.75));
+	}
+	 */	
 	_timeRuler->repaint();
-	_prevTime = curTime;
 	emit timeChanged();
 }
 
@@ -204,3 +205,18 @@ void TimeBar::setRange(qreal startTime, qreal endTime)
 }
 
 //=======================================================================================
+
+void TimeBar::firstClicked()
+{
+	_timeLine->setCurrentTime(0);
+}
+
+//=======================================================================================
+
+void TimeBar::lastClicked()
+{
+	_timeLine->setCurrentTime(_timeLine->duration()-1);
+}
+
+//=======================================================================================
+

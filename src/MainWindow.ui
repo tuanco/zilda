@@ -143,54 +143,6 @@
             </property>
            </widget>
           </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="QToolButton" name="firstFrameButton">
-              <property name="text">
-               <string>|&lt;</string>
-              </property>
-              <property name="icon">
-               <iconset resource="../zilda.qrc">
-                <normaloff>:/data/icons/First.png</normaloff>:/data/icons/First.png</iconset>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="playButton">
-              <property name="text">
-               <string>&gt;</string>
-              </property>
-              <property name="icon">
-               <iconset resource="../zilda.qrc">
-                <normaloff>:/data/icons/Play.png</normaloff>:/data/icons/Play.png</iconset>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="stopButton">
-              <property name="text">
-               <string>S</string>
-              </property>
-              <property name="icon">
-               <iconset resource="../zilda.qrc">
-                <normaloff>:/data/icons/Stop.png</normaloff>:/data/icons/Stop.png</iconset>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QToolButton" name="lastFrameButton">
-              <property name="text">
-               <string>&gt;|</string>
-              </property>
-              <property name="icon">
-               <iconset resource="../zilda.qrc">
-                <normaloff>:/data/icons/Last.png</normaloff>:/data/icons/Last.png</iconset>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
          </layout>
         </widget>
        </item>
@@ -346,7 +298,7 @@
      <x>0</x>
      <y>0</y>
      <width>647</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

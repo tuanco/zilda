@@ -44,7 +44,7 @@ protected slots:
 	void	usePangolinPalette();
 	void	useILDAPalette();
 	void	about();
-	
+	void	frameSliderChanged(int pos);
 	void	frameChanged(Frame *newFrame);
 
 
@@ -59,7 +59,7 @@ private:
 	void			readSettings();
 
 	QSharedPointer<Sequence>	_sequence;
-	QPointer<QTimeLine>			_timeLine;
+	QTimeLine					*_timeLine;
 	QGraphicsTextItem			*_noFileLoadedItem;
 	QVector<QColor>				_ildaPalette;
 	QVector<QColor>				_pangolinPalette;

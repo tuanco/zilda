@@ -43,6 +43,10 @@ protected:
 	void	mousePressEvent(QMouseEvent *ev);
 	void	mouseReleaseEvent(QMouseEvent *ev);
 	void	mouseMoveEvent(QMouseEvent *ev);
+	
+protected slots:
+	void	setInMarker();
+	void	setOutMarker();
 		
 	
 Q_SIGNALS:
@@ -58,6 +62,8 @@ private:
 	qreal _timeVisualized;
 	bool _drag;
 	TimeBar *_timeBar;
+	QAction *_actionInMarker,
+			*_actionOutMarker;
 };
 
 //=======================================================================================

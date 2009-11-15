@@ -27,6 +27,7 @@ class QTimeSnap;
 class QLabel;
 class QSlider;
 class QToolButton;
+class QTimeLine;
 
 //=======================================================================================
 
@@ -42,8 +43,6 @@ public:
 	void	setRange(qreal startTime, qreal endTime);
 	
 	void	snapTime();
-	qreal	demoTime() const { return _demoTime; }
-	void	setDemoTime(qreal time) { _demoTime = time; }
 	qreal	startTime() { return _timeRuler->startSecs(); }
 	
 	bool	snapFollow() { return _snapFollow; }
@@ -51,12 +50,13 @@ public:
 	
 	void	newTime(); // to be called to emit signals and repaint (after an external setDemoTime(); 
 	
+	QTimeLine*	timeLine() { return _timeLine; }
+	
 	
 private:
 	
 	qreal _demoTime; // in seconds
 	bool _isPlaying;
-	QTime _prevTime;
 	
 	TimeRuler	*_timeRuler;
 	QPushButton *_timePrev, 
@@ -70,6 +70,7 @@ private:
 				*_timerPrev, 
 				*_timerPlay;
 	bool         _snapFollow;
+	QTimeLine	*_timeLine;
 	
 	
 signals:
@@ -84,7 +85,9 @@ public slots:
 	void prevClicked();
 	void playClicked();
 	void stopClicked();
-	void playTimeout();
+	void playTimeout(qreal value);
+	void firstClicked();
+	void lastClicked();
 };
 
 //=======================================================================================

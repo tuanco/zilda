@@ -86,21 +86,19 @@ void MainWindow::fileOpen()
 
 		// Setup frame slider
 		frameSlider->setRange(0, _sequence->frameCount()-1);
-		_timeBar->setRange(0, _sequence->frameCount() * 40 / 1000);
+		_timeBar->setRange(0, _sequence->frameCount() / 1000.0 * 40);
 		
-		_timeLine = new QTimeLine(40 * _sequence->frameCount(), this);
-		_timeLine->setFrameRange(0, _sequence->frameCount()-1);
+//		_timeLine = new QTimeLine(40 * _sequence->frameCount(), this);
+		_timeLine = _timeBar->timeLine();
+		_timeLine->setDuration(40 * _sequence->frameCount());
+		_timeLine->setFrameRange(0, _sequence->frameCount());
 		_timeLine->setCurveShape(QTimeLine::LinearCurve);
 		_timeLine->setLoopCount(0);
 		connect(_timeLine, SIGNAL(frameChanged(int)), _sequence.data(), SLOT(setActiveFrame(int)));
 
 		// Build the connections
 		connect(_sequence.data(), SIGNAL(frameChanged(Frame*)), this, SLOT(frameChanged(Frame*)));
-		connect(firstFrameButton, SIGNAL(clicked()), _sequence.data(), SLOT(gotoFirstFrame()));
-		connect(lastFrameButton, SIGNAL(clicked()), _sequence.data(), SLOT(gotoLastFrame()));
-		connect(stopButton, SIGNAL(clicked()), _timeLine, SLOT(stop()));
-		connect(playButton, SIGNAL(clicked()), _timeLine, SLOT(start()));
-		connect(frameSlider, SIGNAL(valueChanged(int)), _sequence.data(), SLOT(setActiveFrame(int)));
+		connect(frameSlider, SIGNAL(valueChanged(int)), SLOT(frameSliderChanged(int)));
 		connect(normalRadioButton, SIGNAL(clicked()), this, SLOT(drawModeChanged()));
 		connect(diagnosticRadioButton, SIGNAL(clicked()), this, SLOT(drawModeChanged()));
 
@@ -139,6 +137,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
 }
 
 //=======================================================================================
+
+void MainWindow::frameSliderChanged(int pos)
+{
+	if (_timeLine->state() != QTimeLine::Running)
+		_timeLine->setCurrentTime(pos * 40);
+}
 
 void MainWindow::frameChanged(Frame *newFrame)
 {

@@ -22,14 +22,17 @@
 
 TimeRuler::TimeRuler(TimeBar *parent) 
 : QWidget(parent)
+, _startTime(0.0)
+, _endTime(0.0/*std::numeric_limits<qreal>::max()*/)
 , _startSecs(0.0)
 , _timeBar(parent)
-, _startTime(0.0)
-, _endTime(std::numeric_limits<qreal>::max())
 {
 	_drag = false;
 	_timeVisualized = (qreal)((rect().width() + 10) / 40.9999); // each second is 40 pixel lenght (10 = 5 pixel spacing left+5pixel spacing right)
-	
+	_actionInMarker = new QAction(tr("Set IN marker"), this);
+	_actionOutMarker = new QAction(tr("Set OUT marker"), this);
+	connect(_actionInMarker, SIGNAL(triggered()), SLOT(setInMarker()));
+	connect(_actionOutMarker, SIGNAL(triggered()), SLOT(setOutMarker()));
 }
 
 //=======================================================================================
@@ -61,11 +64,16 @@ void TimeRuler::paintEvent(QPaintEvent *)
 	painter.fillRect(rc.adjusted(1, 1, -2, -2), QColor(92, 92, 92));
 	
 	qreal nSecs = (int)((rc.width() + 10) / 40.9999); // each second is 40 pixel lenght (10 = 5 pixel spacing left+5pixel spacing right)
-	//nSecs = qMin(nSecs, _endTime);
+	//nSecs = qMin(nSecs, _timeBar->timeLine()->duration() / 1000.0);
 	_timeVisualized = nSecs;
-	
+		
 	int startx = (int)((rc.width() - nSecs*40) / 2);
-
+	
+//	qreal delta = (_timeBar->timeLine()->duration() / 1000.0) - _startSecs;
+//	painter.fillRect(startx, 0, delta*40, 17, Qt::blue);
+	
+//	qDebug() << "delta = " << delta;
+	
 	for (int i=0; i<=nSecs*10; i++)
 	{
 		int curx = startx + i*4;
@@ -75,6 +83,11 @@ void TimeRuler::paintEvent(QPaintEvent *)
 			endy = 17;
 		else if ((i % 5) == 0)
 			endy = 13;
+		
+//		qDebug() << curx + _startSecs << _timeBar->timeLine()->duration() / 1000.0 * 40;
+		qreal tmp = _timeBar->timeLine()->duration() / 1000.0 * 40;
+		if ((curx + _startSecs) > _timeBar->timeLine()->duration() / 1000.0 * 40)
+			continue;
 		
 		painter.setPen(lineColor);
 		painter.drawLine(curx, 2, curx, endy);
@@ -97,11 +110,11 @@ void TimeRuler::paintEvent(QPaintEvent *)
 	}
 
 	// Draw the current time marker
-	qreal demoTime = _timeBar->demoTime();
+	qreal demoTime = (qreal)_timeBar->timeLine()->currentTime() / 1000.0;
 	if (demoTime - _startSecs < nSecs+0.01 && 
 	    demoTime >= _startSecs)
 	{
-		int barx = (int)((_timeBar->demoTime() - _startSecs) * 40 + startx);
+		int barx = (int)((demoTime - _startSecs) * 40 + startx);
 		QPen pen(Qt::red);
 
 		pen.setWidth(2);
@@ -114,10 +127,17 @@ void TimeRuler::paintEvent(QPaintEvent *)
 
 void TimeRuler::mousePressEvent(QMouseEvent *ev)
 {
-	if (ev->button() & Qt::LeftButton)
+	if (ev->button() & Qt::LeftButton && _timeBar->timeLine()->state() != QTimeLine::Running)
 	{
 		_drag = true;
 		mouseMoveEvent(ev);
+	}
+	else if (ev->button() & Qt::RightButton)
+	{
+		QMenu menu;
+		menu.addAction(_actionInMarker);
+		menu.addAction(_actionOutMarker);
+		menu.exec(ev->globalPos());
 	}
 }
 
@@ -149,14 +169,34 @@ void TimeRuler::mouseMoveEvent(QMouseEvent *ev)
 			qreal time = (ev->pos().x() - startx) / 40.0 + _startSecs;
 			
 			// small hack to fix some float<->int rounding in coordinate
-			if(_timeBar->demoTime() > _startSecs+nSecs)
+			if(_timeBar->timeLine()->currentTime() / 1000.0 > _startSecs+nSecs)
+			{
 				time = _startSecs + nSecs;
+			}
 			
-			_timeBar->setDemoTime(time);
+			if (time > _timeBar->timeLine()->duration() / 1000.0)
+				time = (_timeBar->timeLine()->duration()-1) / 1000.0;
+			
+//			qDebug() << "time = " << time << ", timeline = " << _timeBar->timeLine()->duration() / 1000.0;
+			
+			int intTime = time * 1000;
+			_timeBar->timeLine()->setCurrentTime(intTime);
 			emit timeChanged();
 			repaint();
 		}
 	}
+}
+
+//=======================================================================================
+
+void TimeRuler::setInMarker()
+{
+}
+
+//=======================================================================================
+
+void TimeRuler::setOutMarker()
+{
 }
 
 //=======================================================================================
