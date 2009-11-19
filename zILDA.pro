@@ -22,6 +22,7 @@ FORMS += src/MainWindow.ui
 RESOURCES += zilda.qrc
 
 TRANSLATIONS = zILDA_de.ts
+INCLUDEPATH = src/
 
 win32 {
     RC_FILE = zilda_icon.rc

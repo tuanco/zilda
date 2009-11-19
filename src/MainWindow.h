@@ -44,12 +44,14 @@ protected slots:
 	void	usePangolinPalette();
 	void	useILDAPalette();
 	void	about();
-	void	frameSliderChanged(int pos);
 	void	frameChanged(Frame *newFrame);
+    void    fileBrowserItemClicked(const QModelIndex& index);
+    void    fileBrowserItemDblClicked(const QModelIndex& index);
 
 
 private:
 
+    void            openFile(const QString& fileName);
 	QString			getFileSize(qint64 size) const;
 	QVector<QColor> loadPalette(const QString& fileName) const;
 	bool			savePalette(const QString& fileName, 
@@ -64,6 +66,7 @@ private:
 	QVector<QColor>				_ildaPalette;
 	QVector<QColor>				_pangolinPalette;
 	QVector<QColor>				*_currentPalette;
-	QString						_lastDirectory;
+    QString						_lastDirectory,
+                                _lastFileBrowserItem;
 	bool						_isMaximized;
 };

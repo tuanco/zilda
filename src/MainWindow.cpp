@@ -44,14 +44,24 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	_currentPalette = &_ildaPalette;
 	
 	// TEST
+#if 0
 	QDirModel *fsModel = new QDirModel(this);
 	//fsModel->setRootPath(QDir::rootPath());
 	//fsModel->setNameFilterDisables(false);
 	fsModel->setNameFilters(QStringList() << "*.ild");
 	fsModel->setFilter(QDir::AllDirs | QDir::Files);
 	fsModel->refresh();
+#else
+    QFileSystemModel *fsModel = new QFileSystemModel(this);
+    fsModel->setRootPath(QDir::rootPath());
+    fsModel->setNameFilterDisables(false);
+    fsModel->setNameFilters(QStringList() << "*.ild");
+    //fsModel->setFilter(QDir::AllDirs | QDir::Files | QDir:);
+#endif
 	treeView->setModel(fsModel);
 	//treeView->setRootIndex(fsModel->index(QDir::homePath()));
+    connect(treeView, SIGNAL(clicked(QModelIndex)), SLOT(fileBrowserItemClicked(QModelIndex)));
+    connect(treeView, SIGNAL(doubleClicked(QModelIndex)), SLOT(fileBrowserItemDblClicked(QModelIndex)));
 	
 	readSettings();
 }
@@ -74,50 +84,7 @@ void MainWindow::fileOpen()
 	
 	if (fileInfo.exists())
 	{
-		ReaderWriterILDA reader;
-
-		_sequence = QSharedPointer<Sequence>(reader.readFile(fileName));
-		_sequence->setPalette(*_currentPalette);
-		
-		_lastDirectory = fileInfo.absoluteFilePath();
-
-		// Fill file statistics
-		fileNameLabel->setText(fileInfo.fileName());
-		fileSizeLabel->setText(getFileSize(fileInfo.size()));
-		ildaFormatLabel->setText(reader.version());
-		numberOfFramesLabel->setText(QString::number(_sequence->frameCount()));
-
-		// Set the current drawing mode (FIXME: Do not query the GUI for such infos)
-		if (normalRadioButton->isChecked())
-			_sequence->setDrawMode(Sequence::DrawModeNormal);
-		else if (diagnosticRadioButton->isChecked())
-			_sequence->setDrawMode(Sequence::DrawModeDiagnostic);
-
-		// Setup frame slider
-		_timeBar->setRange(0, _sequence->frameCount() / 1000.0 * 30);
-		
-//		_timeLine = new QTimeLine(40 * _sequence->frameCount(), this);
-		_timeLine = _timeBar->timeLine();
-		_timeLine->setDuration(30 * _sequence->frameCount());
-		_timeLine->setFrameRange(0, _sequence->frameCount());
-		_timeLine->setCurveShape(QTimeLine::LinearCurve);
-		_timeLine->setLoopCount(0);
-		connect(_timeLine, SIGNAL(frameChanged(int)), _sequence.data(), SLOT(setActiveFrame(int)));
-
-		// Build the connections
-		connect(_sequence.data(), SIGNAL(frameChanged(Frame*)), this, SLOT(frameChanged(Frame*)));
-		connect(normalRadioButton, SIGNAL(clicked()), this, SLOT(drawModeChanged()));
-		connect(diagnosticRadioButton, SIGNAL(clicked()), this, SLOT(drawModeChanged()));
-
-		QGraphicsScene *scene = new QGraphicsScene();
-		scene->addItem(_sequence.data());
-		graphicsView->setScene(scene);
-
-		frameChanged(_sequence->frame(0));
-		_timeBar->update();
-
-		// FIXME: Need to call this until a resize event happens.
-		resizeEvent(NULL);
+        openFile(fileName);
 	}
 }
 
@@ -148,9 +115,23 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 //=======================================================================================
 
-void MainWindow::frameSliderChanged(int pos)
+void MainWindow::fileBrowserItemClicked(const QModelIndex& index)
 {
+    QFileSystemModel *fsModel = qobject_cast<QFileSystemModel*>(treeView->model());
+    _lastFileBrowserItem = fsModel->fileInfo(index).absoluteFilePath();
+    qDebug() << _lastFileBrowserItem;
 }
+
+//=======================================================================================
+
+void MainWindow::fileBrowserItemDblClicked(const QModelIndex& index)
+{
+    QFileSystemModel *fsModel = qobject_cast<QFileSystemModel*>(treeView->model());
+    _lastFileBrowserItem = fsModel->fileInfo(index).absoluteFilePath();
+    openFile(_lastFileBrowserItem);
+}
+
+//=======================================================================================
 
 void MainWindow::frameChanged(Frame *newFrame)
 {
@@ -177,6 +158,57 @@ void MainWindow::drawModeChanged()
 		_sequence->setDrawMode(Sequence::DrawModeNormal);
 	else if (diagnosticRadioButton->isChecked())
 		_sequence->setDrawMode(Sequence::DrawModeDiagnostic);
+}
+
+//=======================================================================================
+
+void MainWindow::openFile(const QString& fileName)
+{
+    QFileInfo fileInfo(fileName);
+    ReaderWriterILDA reader;
+
+    _lastDirectory = fileInfo.absoluteFilePath();
+
+    _sequence = QSharedPointer<Sequence>(reader.readFile(fileName));
+    _sequence->setPalette(*_currentPalette);
+
+    // Fill file statistics
+    fileNameLabel->setText(fileInfo.fileName());
+    fileSizeLabel->setText(getFileSize(fileInfo.size()));
+    ildaFormatLabel->setText(reader.version());
+    numberOfFramesLabel->setText(QString::number(_sequence->frameCount()));
+
+    // Set the current drawing mode (FIXME: Do not query the GUI for such infos)
+    if (normalRadioButton->isChecked())
+        _sequence->setDrawMode(Sequence::DrawModeNormal);
+    else if (diagnosticRadioButton->isChecked())
+        _sequence->setDrawMode(Sequence::DrawModeDiagnostic);
+
+    // Setup frame slider
+    _timeBar->setRange(0, _sequence->frameCount() / 1000.0 * 30);
+
+//		_timeLine = new QTimeLine(40 * _sequence->frameCount(), this);
+    _timeLine = _timeBar->timeLine();
+    _timeLine->setDuration(30 * _sequence->frameCount());
+    _timeLine->setFrameRange(0, _sequence->frameCount());
+    _timeLine->setCurveShape(QTimeLine::LinearCurve);
+    _timeLine->setLoopCount(0);
+    connect(_timeLine, SIGNAL(frameChanged(int)), _sequence.data(), SLOT(setActiveFrame(int)));
+
+    // Build the connections
+    connect(_sequence.data(), SIGNAL(frameChanged(Frame*)), this, SLOT(frameChanged(Frame*)));
+    connect(normalRadioButton, SIGNAL(clicked()), this, SLOT(drawModeChanged()));
+    connect(diagnosticRadioButton, SIGNAL(clicked()), this, SLOT(drawModeChanged()));
+
+    QGraphicsScene *scene = new QGraphicsScene();
+    scene->addItem(_sequence.data());
+    graphicsView->setScene(scene);
+
+    frameChanged(_sequence->frame(0));
+    _timeBar->update();
+
+    // FIXME: Need to call this until a resize event happens.
+    resizeEvent(NULL);
 }
 
 //=======================================================================================
@@ -303,6 +335,7 @@ void MainWindow::writeSettings() const
     settings.setValue("pos", pos());	
 	settings.setValue("maximized", _isMaximized);
 	settings.setValue("lastDirectory", _lastDirectory);
+    settings.setValue("lastFileBrowserItem", _lastFileBrowserItem);
 	settings.endGroup();
 
 	QString palette;
@@ -317,25 +350,34 @@ void MainWindow::writeSettings() const
 
 void MainWindow::readSettings()
 {
-	QSettings settings(CompanyName, ProductName);
+    QSettings settings(CompanyName, ProductName);
 
-	 settings.beginGroup("MainWindow");
-	 resize(settings.value("size", QSize(400, 400)).toSize());
-	 move(settings.value("pos", QPoint(200, 200)).toPoint());
-	 if (settings.value("maximized", false).toBool())
-		 showMaximized();
+    settings.beginGroup("MainWindow");
+    resize(settings.value("size", QSize(400, 400)).toSize());
+    move(settings.value("pos", QPoint(200, 200)).toPoint());
+    if (settings.value("maximized", false).toBool())
+        showMaximized();
 	_lastDirectory = settings.value("lastDirectory", "").toString();
-	 settings.endGroup();
+    _lastFileBrowserItem = settings.value("lastFileBrowserItem", "").toString();
+    settings.endGroup();
 
-	 QString palette = settings.value("palette", "ilda").toString();
-	 if (palette == "ilda")
-	 {
-		 useILDAPalette();
-	 }
-	 else if (palette == "pangolin")
-	 {
-		 usePangolinPalette();
-	 }
+    QString palette = settings.value("palette", "ilda").toString();
+    if (palette == "ilda")
+    {
+        useILDAPalette();
+    }
+    else if (palette == "pangolin")
+    {
+        usePangolinPalette();
+    }
+
+    if (!_lastFileBrowserItem.isEmpty())
+    {
+        QFileSystemModel *model = qobject_cast<QFileSystemModel*>(treeView->model());
+        QModelIndex index = model->index(_lastFileBrowserItem);
+        treeView->setCurrentIndex(index);
+        treeView->scrollTo(index);
+    }
 }
 
 //=======================================================================================
