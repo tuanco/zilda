@@ -159,14 +159,13 @@ void TimeRuler::mouseReleaseEvent(QMouseEvent *ev)
 
 void TimeRuler::mouseMoveEvent(QMouseEvent *ev)
 {
-	if (ev->button() & Qt::LeftButton)
+	if (_drag)
 	{
 		QRect rc = rect();
 		qreal nSecs = (int)((rc.width() + 10) / 40.9999); // each second is 40 pixel lenght (10 = 5 pixel spacing left+5pixel spacing right)
 		int startx = (int)((rc.width() - nSecs*40) / 2) - 1;
 		
-		if (_drag && 
-			ev->pos().x() > startx && 
+		if (ev->pos().x() > startx && 
 			ev->pos().x() < rc.width()-startx)
 		{
 			qreal time = (ev->pos().x() - startx) / 40.0 + _startSecs;
@@ -187,8 +186,7 @@ void TimeRuler::mouseMoveEvent(QMouseEvent *ev)
 			emit timeChanged();
 			repaint();
 		}
-		else if (_drag &&
-				 ev->pos().x() >= rc.width()-startx)
+		else if (ev->pos().x() >= rc.width()-startx)
 		{
 			_timeBar->timeLine()->setCurrentTime(_timeBar->timeLine()->duration()-1);
 			emit timeChanged();

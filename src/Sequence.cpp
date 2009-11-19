@@ -128,12 +128,9 @@ void Sequence::setActiveFrame(int nr)
 	if (nr >= _frames.count())
 		return;
 
-	if ((*_currentFrame)->frameNr() != nr)
-	{
-		_currentFrame = _frames.begin() + nr;
-		update();
+	_currentFrame = _frames.begin() + nr;
+	update();
 	emit frameChanged((*_currentFrame).data());
-	}
 }
 
 //=======================================================================================

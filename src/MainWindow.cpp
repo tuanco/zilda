@@ -9,6 +9,7 @@
 
 // Qt 
 #include <QtGui>
+#include <QtOpenGL>
 
 // Project
 #include "MainWindow.h"
@@ -28,9 +29,6 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 {
 	setupUi(this);
 	
-	frameSlider->setPageStep(1);
-	frameSlider->setSingleStep(1);
-	
 	connect(actionOpen, SIGNAL(triggered()), this, SLOT(fileOpen()));
 	connect(actionPangolin_palette, SIGNAL(triggered()), SLOT(usePangolinPalette()));
 	connect(actionILDA_palette, SIGNAL(triggered()), SLOT(useILDAPalette()));
@@ -39,11 +37,22 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	QGraphicsScene *scene = new QGraphicsScene();
 	_noFileLoadedItem = scene->addText(tr("No ILDA sequence loaded"));		
 	graphicsView->setScene(scene);
+	graphicsView->setViewport(new QGLWidget());
 
 	_ildaPalette = loadPalette(":/data/ilda.palette");
 	_pangolinPalette = loadPalette(":/data/pangolin.palette");
 	_currentPalette = &_ildaPalette;
-
+	
+	// TEST
+	QDirModel *fsModel = new QDirModel(this);
+	//fsModel->setRootPath(QDir::rootPath());
+	//fsModel->setNameFilterDisables(false);
+	fsModel->setNameFilters(QStringList() << "*.ild");
+	fsModel->setFilter(QDir::AllDirs | QDir::Files);
+	fsModel->refresh();
+	treeView->setModel(fsModel);
+	//treeView->setRootIndex(fsModel->index(QDir::homePath()));
+	
 	readSettings();
 }
 
@@ -85,7 +94,6 @@ void MainWindow::fileOpen()
 			_sequence->setDrawMode(Sequence::DrawModeDiagnostic);
 
 		// Setup frame slider
-		frameSlider->setRange(0, _sequence->frameCount()-1);
 		_timeBar->setRange(0, _sequence->frameCount() / 1000.0 * 30);
 		
 //		_timeLine = new QTimeLine(40 * _sequence->frameCount(), this);
@@ -98,14 +106,14 @@ void MainWindow::fileOpen()
 
 		// Build the connections
 		connect(_sequence.data(), SIGNAL(frameChanged(Frame*)), this, SLOT(frameChanged(Frame*)));
-		connect(frameSlider, SIGNAL(valueChanged(int)), SLOT(frameSliderChanged(int)));
 		connect(normalRadioButton, SIGNAL(clicked()), this, SLOT(drawModeChanged()));
 		connect(diagnosticRadioButton, SIGNAL(clicked()), this, SLOT(drawModeChanged()));
 
 		QGraphicsScene *scene = new QGraphicsScene();
 		scene->addItem(_sequence.data());
 		graphicsView->setScene(scene);
-		
+
+		frameChanged(_sequence->frame(0));
 		_timeBar->update();
 
 		// FIXME: Need to call this until a resize event happens.
@@ -142,8 +150,6 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 void MainWindow::frameSliderChanged(int pos)
 {
-	if (_timeLine->state() != QTimeLine::Running)
-		_timeLine->setCurrentTime(pos * 40);
 }
 
 void MainWindow::frameChanged(Frame *newFrame)
@@ -151,7 +157,6 @@ void MainWindow::frameChanged(Frame *newFrame)
 	int newFrameNr = newFrame->frameNr();
 
 	frameLabel->setText(QString::number(newFrameNr+1));
-	frameSlider->setSliderPosition(newFrameNr);
 	numberOfPointsLabel->setText(QString::number(newFrame->pointCount()));
 	numberOfLinesLabel->setText(QString::number(newFrame->visiblePointCount()));
 	numberOfHiddenLinesLabel->setText(QString::number(newFrame->hiddenPointCount()));

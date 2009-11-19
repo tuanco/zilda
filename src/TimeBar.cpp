@@ -221,6 +221,7 @@ void TimeBar::setRange(qreal startTime, qreal endTime)
 void TimeBar::firstClicked()
 {
 	_timeLine->setCurrentTime(0);
+	_timeRuler->setStartSecs(0);
 }
 
 //=======================================================================================
@@ -228,6 +229,7 @@ void TimeBar::firstClicked()
 void TimeBar::lastClicked()
 {
 	_timeLine->setCurrentTime(_timeLine->duration()-1);
+	_timeRuler->setStartSecs(_timeLine->duration() / 1000 - _timeRuler->timeVisualized());
 }
 
 //=======================================================================================
