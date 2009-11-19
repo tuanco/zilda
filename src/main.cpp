@@ -16,7 +16,7 @@
 
 // Project
 #include "MainWindow.h"
-//#include "DarkStyle.h"
+#include "DarkStyle.h"
 
 //=======================================================================================
 
@@ -37,11 +37,10 @@
 int main(int argc, char** argv)
 {
 	QApplication app(argc, argv);
-	//app.setStyle(new DarkStyle());
 	
 	Q_INIT_RESOURCE(zilda);
 	
-	QPlastiqueStyle *style = new QPlastiqueStyle();
+	QStyle *style = new DarkStyle();
 	QApplication::setStyle(style);
 	
 	QPalette pal = app.palette();

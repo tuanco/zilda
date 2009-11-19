@@ -37,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 	QGraphicsScene *scene = new QGraphicsScene();
 	_noFileLoadedItem = scene->addText(tr("No ILDA sequence loaded"));		
 	graphicsView->setScene(scene);
-	graphicsView->setViewport(new QGLWidget());
+	//graphicsView->setViewport(new QGLWidget());
 
 	_ildaPalette = loadPalette(":/data/ilda.palette");
 	_pangolinPalette = loadPalette(":/data/pangolin.palette");
@@ -164,6 +164,8 @@ void MainWindow::drawModeChanged()
 
 void MainWindow::openFile(const QString& fileName)
 {
+	_timeBar->stopClicked();
+	
     QFileInfo fileInfo(fileName);
     ReaderWriterILDA reader;
 

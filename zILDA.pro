@@ -9,7 +9,8 @@ HEADERS += src/MainWindow.h \
 			src/Sequence.h \
 			src/Point.h \
 			src/TimeRuler.h \
-			src/TimeBar.h
+			src/TimeBar.h \
+			src/DarkStyle.h
 SOURCES += src/main.cpp \
 			src/MainWindow.cpp \
 			src/ReaderWriterILDA.cpp \
@@ -17,7 +18,8 @@ SOURCES += src/main.cpp \
 			src/Sequence.cpp \
 			src/Point.cpp \
 			src/TimeRuler.cpp \
-			src/TimeBar.cpp
+			src/TimeBar.cpp \
+			src/DarkStyle.cpp
 FORMS += src/MainWindow.ui
 RESOURCES += zilda.qrc
 
