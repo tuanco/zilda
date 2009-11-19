@@ -35,7 +35,7 @@ public:
 	qreal	startSecs() { return _startSecs; }
 	void	setStartSecs(qreal startSecs) { _startSecs = startSecs; }
 	qreal	timeVisualized() { return _timeVisualized; }
-
+	
 
 protected:
 

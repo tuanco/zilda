@@ -57,22 +57,31 @@ void TimeRuler::paintEvent(QPaintEvent *)
 	QColor lineColor(119, 119, 119);
 	QColor textColor = pal.color(QPalette::WindowText);
 	QFont font("Arial", 10);
+	QFontMetrics fm(font);
 	
 	// Draw background
 	painter.setPen(QColor(80, 80, 80));
 	painter.drawRect(rc);
 	painter.fillRect(rc.adjusted(1, 1, -2, -2), QColor(92, 92, 92));
 	
+	
 	qreal nSecs = (int)((rc.width() + 10) / 40.9999); // each second is 40 pixel lenght (10 = 5 pixel spacing left+5pixel spacing right)
 	//nSecs = qMin(nSecs, _timeBar->timeLine()->duration() / 1000.0);
 	_timeVisualized = nSecs;
 		
+	qreal currentTime = _timeBar->timeLine()->currentTime() / 1000.0;
 	int startx = (int)((rc.width() - nSecs*40) / 2);
-	
-//	qreal delta = (_timeBar->timeLine()->duration() / 1000.0) - _startSecs;
+		
+	qreal delta = ((_timeBar->timeLine()->duration() / 1000.0) - _startSecs)*40;
 //	painter.fillRect(startx, 0, delta*40, 17, Qt::blue);
 	
 //	qDebug() << "delta = " << delta;
+	
+	// Draw ilda file length
+	if (delta > _timeVisualized * 40)
+		delta = _timeVisualized * 40;
+	painter.fillRect(startx, 2, delta, 17, QColor(250,250,255,120));
+	
 	
 	for (int i=0; i<=nSecs*10; i++)
 	{
@@ -83,11 +92,6 @@ void TimeRuler::paintEvent(QPaintEvent *)
 			endy = 17;
 		else if ((i % 5) == 0)
 			endy = 13;
-		
-//		qDebug() << curx + _startSecs << _timeBar->timeLine()->duration() / 1000.0 * 40;
-		qreal tmp = _timeBar->timeLine()->duration() / 1000.0 * 40;
-		if ((curx + _startSecs) > _timeBar->timeLine()->duration() / 1000.0 * 40)
-			continue;
 		
 		painter.setPen(lineColor);
 		painter.drawLine(curx, 2, curx, endy);
@@ -101,7 +105,7 @@ void TimeRuler::paintEvent(QPaintEvent *)
 			QString tmp;
 			tmp.sprintf("%02d:%02d", minutes, seconds);
 
-			QRect rect = painter.fontMetrics().boundingRect(tmp);
+			QRect rect = fm.boundingRect(tmp);
 			
 			painter.setPen(textColor);
 			painter.setFont(font);
@@ -111,8 +115,8 @@ void TimeRuler::paintEvent(QPaintEvent *)
 
 	// Draw the current time marker
 	qreal demoTime = (qreal)_timeBar->timeLine()->currentTime() / 1000.0;
-	if (demoTime - _startSecs < nSecs+0.01 && 
-	    demoTime >= _startSecs)
+	/*if (demoTime - _startSecs < nSecs+0.01 && 
+	    demoTime >= _startSecs)*/
 	{
 		int barx = (int)((demoTime - _startSecs) * 40 + startx);
 		QPen pen(Qt::red);
@@ -159,7 +163,6 @@ void TimeRuler::mouseMoveEvent(QMouseEvent *ev)
 	{
 		QRect rc = rect();
 		qreal nSecs = (int)((rc.width() + 10) / 40.9999); // each second is 40 pixel lenght (10 = 5 pixel spacing left+5pixel spacing right)
-		//nSecs = qMin(nSecs, _endTime);
 		int startx = (int)((rc.width() - nSecs*40) / 2) - 1;
 		
 		if (_drag && 
@@ -181,6 +184,13 @@ void TimeRuler::mouseMoveEvent(QMouseEvent *ev)
 			
 			int intTime = time * 1000;
 			_timeBar->timeLine()->setCurrentTime(intTime);
+			emit timeChanged();
+			repaint();
+		}
+		else if (_drag &&
+				 ev->pos().x() >= rc.width()-startx)
+		{
+			_timeBar->timeLine()->setCurrentTime(_timeBar->timeLine()->duration()-1);
 			emit timeChanged();
 			repaint();
 		}

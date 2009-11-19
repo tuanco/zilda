@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 , _isMaximized(false)
 {
 	setupUi(this);
-
+	
 	frameSlider->setPageStep(1);
 	frameSlider->setSingleStep(1);
 	
@@ -86,11 +86,11 @@ void MainWindow::fileOpen()
 
 		// Setup frame slider
 		frameSlider->setRange(0, _sequence->frameCount()-1);
-		_timeBar->setRange(0, _sequence->frameCount() / 1000.0 * 40);
+		_timeBar->setRange(0, _sequence->frameCount() / 1000.0 * 30);
 		
 //		_timeLine = new QTimeLine(40 * _sequence->frameCount(), this);
 		_timeLine = _timeBar->timeLine();
-		_timeLine->setDuration(40 * _sequence->frameCount());
+		_timeLine->setDuration(30 * _sequence->frameCount());
 		_timeLine->setFrameRange(0, _sequence->frameCount());
 		_timeLine->setCurveShape(QTimeLine::LinearCurve);
 		_timeLine->setLoopCount(0);
@@ -105,6 +105,8 @@ void MainWindow::fileOpen()
 		QGraphicsScene *scene = new QGraphicsScene();
 		scene->addItem(_sequence.data());
 		graphicsView->setScene(scene);
+		
+		_timeBar->update();
 
 		// FIXME: Need to call this until a resize event happens.
 		resizeEvent(NULL);

@@ -36,6 +36,8 @@ TimeBar::TimeBar(QWidget *parent)
 {
 	_snapFollow = true; 
 	
+	_timeLine->setDuration(0);
+	
 	setFixedHeight(TIMEBAR_HEIGHT);
 	
 	_layout = new QGridLayout(this);
@@ -66,8 +68,12 @@ TimeBar::TimeBar(QWidget *parent)
 	_last = new QToolButton(this);
     _last->setIcon(QIcon(QString::fromUtf8(":/data/icons/Last.png")));
 	
+//	QScrollBar *bar = new QScrollBar(Qt::Horizontal, this);
+	
+	
 	_layout->addWidget(_timePrev,   0, 0, 2, 1);
 	_layout->addWidget(_timeRuler,  0, 1, 2, 1);	
+//	_layout->addWidget(bar,			1, 1);
 	_layout->addWidget(_timeNext,   0, 2, 2, 1);	
 	_layout->addWidget(_playPause,	0, 4);
 	_layout->addWidget(_stop,		0, 5);
@@ -177,7 +183,8 @@ void TimeBar::playTimeout(qreal value)
 	if (_snapFollow && 
 		value * _timeLine->duration() / 1000.0 > _timeRuler->startSecs() + _timeRuler->timeVisualized())
 	{
-		_timeRuler->setStartSecs(_timeRuler->startSecs() + (int)(_timeRuler->timeVisualized()*0.75));
+//		_timeRuler->setStartSecs(_timeRuler->startSecs() + (int)(_timeRuler->timeVisualized()*0.75));
+//		_timeRuler->setStartSecs(_timeRuler->startSecs() + (int)(_timeRuler->timeVisualized()+1));
 	}
 	/* else if (_snapFollow &&
 			 value * _timeLine->duration() / 1000.0 < _timeRuler->startSecs() + _timeRuler->timeVisualized())
@@ -185,6 +192,11 @@ void TimeBar::playTimeout(qreal value)
 		_timeRuler->setStartSecs(_timeRuler->startSecs() - (int)(_timeRuler->timeVisualized()*0.75));
 	}
 	 */	
+	int t1 = _timeRuler->startSecs() + 1 + _timeRuler->timeVisualized();
+	int t2 = _timeLine->currentTime() / 1000.0;
+	if (_snapFollow && _timeRuler->startSecs() + 1 + _timeRuler->timeVisualized() < _timeLine->currentTime() / 1000.0)
+		_timeRuler->setStartSecs(_timeRuler->startSecs() + 1);
+	
 	_timeRuler->repaint();
 	emit timeChanged();
 }
