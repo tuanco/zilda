@@ -28,41 +28,42 @@ MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 , _isMaximized(false)
 {
 	setupUi(this);
-	
-	connect(actionOpen, SIGNAL(triggered()), this, SLOT(fileOpen()));
-	connect(actionPangolin_palette, SIGNAL(triggered()), SLOT(usePangolinPalette()));
-	connect(actionILDA_palette, SIGNAL(triggered()), SLOT(useILDAPalette()));
-	connect(actionAbout, SIGNAL(triggered()), SLOT(about()));
-	
-	QGraphicsScene *scene = new QGraphicsScene();
-	_noFileLoadedItem = scene->addText(tr("No ILDA sequence loaded"));		
-	graphicsView->setScene(scene);
-	//graphicsView->setViewport(new QGLWidget());
 
+	menuView->addAction(fileBrowserDock->toggleViewAction());
+	menuView->addAction(informationDock->toggleViewAction());
+	menuView->addAction(drawingDock->toggleViewAction());
+
+	// Load and initialize palettes
 	_ildaPalette = loadPalette(":/data/ilda.palette");
 	_pangolinPalette = loadPalette(":/data/pangolin.palette");
 	_currentPalette = &_ildaPalette;
-	
-	// TEST
-#if 0
-	QDirModel *fsModel = new QDirModel(this);
-	//fsModel->setRootPath(QDir::rootPath());
-	//fsModel->setNameFilterDisables(false);
-	fsModel->setNameFilters(QStringList() << "*.ild");
-	fsModel->setFilter(QDir::AllDirs | QDir::Files);
-	fsModel->refresh();
-#else
+
+	// File browser
     QFileSystemModel *fsModel = new QFileSystemModel(this);
     fsModel->setRootPath(QDir::rootPath());
     fsModel->setNameFilterDisables(false);
     fsModel->setNameFilters(QStringList() << "*.ild");
-    //fsModel->setFilter(QDir::AllDirs | QDir::Files | QDir:);
-#endif
+
 	treeView->setModel(fsModel);
+	treeView->header()->setResizeMode(0, QHeaderView::ResizeToContents);
+	//treeView->setSortingEnabled(true);
+	//treeView->sortByColumn(0, Qt::AscendingOrder);
+	treeView->setColumnHidden(2, true);
+	treeView->setColumnHidden(3, true);
 	//treeView->setRootIndex(fsModel->index(QDir::homePath()));
+
+	// Create the connections
+	connect(actionOpen, SIGNAL(triggered()), this, SLOT(fileOpen()));
+	connect(actionSaveAs, SIGNAL(triggered()), this, SLOT(fileSaveAs()));
+	connect(actionPangolin_palette, SIGNAL(triggered()), SLOT(usePangolinPalette()));
+	connect(actionILDA_palette, SIGNAL(triggered()), SLOT(useILDAPalette()));
+	connect(actionAbout, SIGNAL(triggered()), SLOT(about()));	
     connect(treeView, SIGNAL(clicked(QModelIndex)), SLOT(fileBrowserItemClicked(QModelIndex)));
     connect(treeView, SIGNAL(doubleClicked(QModelIndex)), SLOT(fileBrowserItemDblClicked(QModelIndex)));
+    connect(normalRadioButton, SIGNAL(clicked()), SLOT(drawModeChanged()));
+    connect(diagnosticRadioButton, SIGNAL(clicked()), SLOT(drawModeChanged()));
 	
+	// restore settings
 	readSettings();
 }
 
@@ -110,6 +111,12 @@ void MainWindow::resizeEvent(QResizeEvent*)
 void MainWindow::closeEvent(QCloseEvent *event)
 {
 	writeSettings();
+
+	QAbstractItemModel *model = treeView->model();
+	treeView->setModel(0);
+	delete model;
+	model = 0;
+
 	event->accept();
 }
 
@@ -119,7 +126,6 @@ void MainWindow::fileBrowserItemClicked(const QModelIndex& index)
 {
     QFileSystemModel *fsModel = qobject_cast<QFileSystemModel*>(treeView->model());
     _lastFileBrowserItem = fsModel->fileInfo(index).absoluteFilePath();
-    qDebug() << _lastFileBrowserItem;
 }
 
 //=======================================================================================
@@ -128,7 +134,11 @@ void MainWindow::fileBrowserItemDblClicked(const QModelIndex& index)
 {
     QFileSystemModel *fsModel = qobject_cast<QFileSystemModel*>(treeView->model());
     _lastFileBrowserItem = fsModel->fileInfo(index).absoluteFilePath();
-    openFile(_lastFileBrowserItem);
+
+	QFileInfo fileInfo(_lastFileBrowserItem);
+
+	if (fileInfo.exists() && fileInfo.isFile())
+		openFile(_lastFileBrowserItem);
 }
 
 //=======================================================================================
@@ -164,6 +174,8 @@ void MainWindow::drawModeChanged()
 
 void MainWindow::openFile(const QString& fileName)
 {
+	QApplication::setOverrideCursor(Qt::WaitCursor);
+
 	_timeBar->stopClicked();
 	
     QFileInfo fileInfo(fileName);
@@ -181,27 +193,21 @@ void MainWindow::openFile(const QString& fileName)
     numberOfFramesLabel->setText(QString::number(_sequence->frameCount()));
 
     // Set the current drawing mode (FIXME: Do not query the GUI for such infos)
-    if (normalRadioButton->isChecked())
-        _sequence->setDrawMode(Sequence::DrawModeNormal);
-    else if (diagnosticRadioButton->isChecked())
-        _sequence->setDrawMode(Sequence::DrawModeDiagnostic);
+	drawModeChanged();
 
-    // Setup frame slider
+    // Setup timeline
     _timeBar->setRange(0, _sequence->frameCount() / 1000.0 * 30);
-
-//		_timeLine = new QTimeLine(40 * _sequence->frameCount(), this);
     _timeLine = _timeBar->timeLine();
     _timeLine->setDuration(30 * _sequence->frameCount());
     _timeLine->setFrameRange(0, _sequence->frameCount());
     _timeLine->setCurveShape(QTimeLine::LinearCurve);
     _timeLine->setLoopCount(0);
-    connect(_timeLine, SIGNAL(frameChanged(int)), _sequence.data(), SLOT(setActiveFrame(int)));
 
     // Build the connections
-    connect(_sequence.data(), SIGNAL(frameChanged(Frame*)), this, SLOT(frameChanged(Frame*)));
-    connect(normalRadioButton, SIGNAL(clicked()), this, SLOT(drawModeChanged()));
-    connect(diagnosticRadioButton, SIGNAL(clicked()), this, SLOT(drawModeChanged()));
+    connect(_timeLine, SIGNAL(frameChanged(int)), _sequence.data(), SLOT(setActiveFrame(int)));
+    connect(_sequence.data(), SIGNAL(frameChanged(Frame*)), SLOT(frameChanged(Frame*)));
 
+	// Create scene and attach to graphics view
     QGraphicsScene *scene = new QGraphicsScene();
     scene->addItem(_sequence.data());
     graphicsView->setScene(scene);
@@ -210,7 +216,9 @@ void MainWindow::openFile(const QString& fileName)
     _timeBar->update();
 
     // FIXME: Need to call this until a resize event happens.
-    resizeEvent(NULL);
+    resizeEvent(0);
+
+	QApplication::restoreOverrideCursor();
 }
 
 //=======================================================================================
@@ -318,7 +326,7 @@ void MainWindow::about()
 	QString text;
 	text = tr(
 			  "<h3>About zILDA</h3>"
-              "<p>Version 0.1</p>"
+              "<p>Version 0.2 ALPHA</p>"
 			  "<p>OpenSource ILDA file viewer</p>"
 			  "<p>Copyright (c) 2009 by Andre Normann</p>"
 			  "<a href=\"http://code.google.com/p/zilda/\"><span style=\"text-decoration: underline; color:#ffaa00;\">http://code.google.com/p/zilda/</span></a>"
@@ -333,11 +341,10 @@ void MainWindow::writeSettings() const
 	QSettings settings(CompanyName, ProductName);
 
 	settings.beginGroup("MainWindow");
-	settings.setValue("size", size());
-    settings.setValue("pos", pos());	
-	settings.setValue("maximized", _isMaximized);
 	settings.setValue("lastDirectory", _lastDirectory);
     settings.setValue("lastFileBrowserItem", _lastFileBrowserItem);
+	settings.setValue("state", saveState());
+	settings.setValue("geometry", saveGeometry());
 	settings.endGroup();
 
 	QString palette;
@@ -355,12 +362,13 @@ void MainWindow::readSettings()
     QSettings settings(CompanyName, ProductName);
 
     settings.beginGroup("MainWindow");
-    resize(settings.value("size", QSize(400, 400)).toSize());
-    move(settings.value("pos", QPoint(200, 200)).toPoint());
-    if (settings.value("maximized", false).toBool())
-        showMaximized();
+
 	_lastDirectory = settings.value("lastDirectory", "").toString();
     _lastFileBrowserItem = settings.value("lastFileBrowserItem", "").toString();
+
+	restoreState(settings.value("state").toByteArray());
+	restoreGeometry(settings.value("geometry").toByteArray());
+
     settings.endGroup();
 
     QString palette = settings.value("palette", "ilda").toString();
@@ -383,3 +391,13 @@ void MainWindow::readSettings()
 }
 
 //=======================================================================================
+
+void MainWindow::fileSaveAs()
+{
+	saveFile("");
+}
+
+void MainWindow::saveFile(const QString& fileName)
+{
+//	int startFrame = _timeLine->
+}

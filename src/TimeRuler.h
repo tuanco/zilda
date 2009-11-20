@@ -35,6 +35,9 @@ public:
 	qreal	startSecs() { return _startSecs; }
 	void	setStartSecs(qreal startSecs) { _startSecs = startSecs; }
 	qreal	timeVisualized() { return _timeVisualized; }
+
+	qreal	inMarker() const { return _inMarker; }
+	qreal	outMarker() const { return _outMarker; }
 	
 
 protected:
@@ -57,13 +60,17 @@ Q_SIGNALS:
 private:
 	
 	qreal _startTime,
-		  _endTime;
+		  _endTime,
+		  _inMarker,
+		  _outMarker;
 	qreal _startSecs;
 	qreal _timeVisualized;
 	bool _drag;
 	TimeBar *_timeBar;
 	QAction *_actionInMarker,
 			*_actionOutMarker;
+	QFont	_font;
+	int		_textWidth;
 };
 
 //=======================================================================================

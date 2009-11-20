@@ -40,6 +40,7 @@ protected:
 protected slots:
 
 	void	fileOpen();
+	void	fileSaveAs();
 	void	drawModeChanged();
 	void	usePangolinPalette();
 	void	useILDAPalette();
@@ -52,6 +53,7 @@ protected slots:
 private:
 
     void            openFile(const QString& fileName);
+	void			saveFile(const QString& fileName);
 	QString			getFileSize(qint64 size) const;
 	QVector<QColor> loadPalette(const QString& fileName) const;
 	bool			savePalette(const QString& fileName, 

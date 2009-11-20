@@ -24,9 +24,14 @@ TimeRuler::TimeRuler(TimeBar *parent)
 : QWidget(parent)
 , _startTime(0.0)
 , _endTime(0.0/*std::numeric_limits<qreal>::max()*/)
+, _inMarker(0.0)
+, _outMarker(0.0)
 , _startSecs(0.0)
 , _timeBar(parent)
+, _font("Arial", 10)
 {
+	QFontMetrics fm(_font);
+	_textWidth = fm.width("00:00");
 	_drag = false;
 	_timeVisualized = (qreal)((rect().width() + 10) / 40.9999); // each second is 40 pixel lenght (10 = 5 pixel spacing left+5pixel spacing right)
 	_actionInMarker = new QAction(tr("Set IN marker"), this);
@@ -43,8 +48,8 @@ TimeRuler::~TimeRuler()
 
 void TimeRuler::setRange(qreal startTime, qreal endTime)
 {
-	_startTime = startTime;
-	_endTime = endTime;
+	_startTime = _inMarker = startTime;
+	_endTime = _outMarker = endTime;
 }
 
 //=======================================================================================
@@ -54,10 +59,9 @@ void TimeRuler::paintEvent(QPaintEvent *)
 	QPainter painter(this);
 	QPalette pal = palette();
 	QRect rc=rect();
-	QColor lineColor(119, 119, 119);
+	QColor lineColor = Qt::gray;
 	QColor textColor = pal.color(QPalette::WindowText);
-	QFont font("Arial", 10);
-	QFontMetrics fm(font);
+	QFontMetrics fm(_font);
 	
 	// Draw background
 	painter.setPen(QColor(80, 80, 80));
@@ -65,22 +69,21 @@ void TimeRuler::paintEvent(QPaintEvent *)
 	painter.fillRect(rc.adjusted(1, 1, -2, -2), QColor(92, 92, 92));
 	
 	
-	qreal nSecs = (int)((rc.width() + 10) / 40.9999); // each second is 40 pixel lenght (10 = 5 pixel spacing left+5pixel spacing right)
-	//nSecs = qMin(nSecs, _timeBar->timeLine()->duration() / 1000.0);
+	qreal nSecs = (int)((rc.width() - _textWidth + 10) / 40.9999); // each second is 40 pixel lenght (10 = 5 pixel spacing left+5pixel spacing right)
 	_timeVisualized = nSecs;
 		
 	qreal currentTime = _timeBar->timeLine()->currentTime() / 1000.0;
 	int startx = (int)((rc.width() - nSecs*40) / 2);
 		
 	qreal delta = ((_timeBar->timeLine()->duration() / 1000.0) - _startSecs)*40;
-//	painter.fillRect(startx, 0, delta*40, 17, Qt::blue);
-	
-//	qDebug() << "delta = " << delta;
 	
 	// Draw ilda file length
 	if (delta > _timeVisualized * 40)
 		delta = _timeVisualized * 40;
-	painter.fillRect(startx, 2, delta, 17, QColor(250,250,255,120));
+
+	painter.setPen(lineColor);
+	painter.drawRect(startx, 37, delta, 14);
+	painter.fillRect(startx + _inMarker*40, 37, startx+_outMarker*40 - (startx + _inMarker*40), 14, lineColor);
 	
 	
 	for (int i=0; i<=nSecs*10; i++)
@@ -108,7 +111,7 @@ void TimeRuler::paintEvent(QPaintEvent *)
 			QRect rect = fm.boundingRect(tmp);
 			
 			painter.setPen(textColor);
-			painter.setFont(font);
+			painter.setFont(_font);
 			painter.drawText(curx - (rect.width() / 2), endy + 3, rect.width(), rect.height(), Qt::AlignHCenter | Qt::AlignTop, tmp);
 		}
 	}
@@ -123,7 +126,7 @@ void TimeRuler::paintEvent(QPaintEvent *)
 
 		pen.setWidth(2);
 		painter.setPen(pen);
-		painter.drawLine(barx, 2, barx, 17);
+		painter.drawLine(barx, 2, barx, 51);
 	}
 }
 
@@ -138,10 +141,20 @@ void TimeRuler::mousePressEvent(QMouseEvent *ev)
 	}
 	else if (ev->button() & Qt::RightButton)
 	{
-		QMenu menu;
-		menu.addAction(_actionInMarker);
-		menu.addAction(_actionOutMarker);
-		menu.exec(ev->globalPos());
+		QRect rc = rect();
+		qreal nSecs = (int)((rc.width() - _textWidth + 10) / 40.9999); // each second is 40 pixel lenght (10 = 5 pixel spacing left+5pixel spacing right)
+		qreal delta = ((_timeBar->timeLine()->duration() / 1000.0) - _startSecs)*40;
+		int startx = (int)((rc.width() - nSecs*40) / 2);
+
+		QRect r(startx, 0, delta, 55);
+
+		if (r.contains(ev->pos()))
+		{
+			QMenu menu;
+			menu.addAction(_actionInMarker);
+			menu.addAction(_actionOutMarker);
+			menu.exec(ev->globalPos());
+		}
 	}
 }
 
@@ -162,7 +175,7 @@ void TimeRuler::mouseMoveEvent(QMouseEvent *ev)
 	if (_drag)
 	{
 		QRect rc = rect();
-		qreal nSecs = (int)((rc.width() + 10) / 40.9999); // each second is 40 pixel lenght (10 = 5 pixel spacing left+5pixel spacing right)
+		qreal nSecs = (int)((rc.width() - _textWidth + 10) / 40.9999); // each second is 40 pixel lenght (10 = 5 pixel spacing left+5pixel spacing right)
 		int startx = (int)((rc.width() - nSecs*40) / 2) - 1;
 		
 		if (ev->pos().x() > startx && 
@@ -176,19 +189,23 @@ void TimeRuler::mouseMoveEvent(QMouseEvent *ev)
 				time = _startSecs + nSecs;
 			}
 			
-			if (time > _timeBar->timeLine()->duration() / 1000.0)
+			if (time > (_timeBar->timeLine()->duration()-1) / 1000.0)
 				time = (_timeBar->timeLine()->duration()-1) / 1000.0;
-			
-//			qDebug() << "time = " << time << ", timeline = " << _timeBar->timeLine()->duration() / 1000.0;
 			
 			int intTime = time * 1000;
 			_timeBar->timeLine()->setCurrentTime(intTime);
 			emit timeChanged();
 			repaint();
 		}
-		else if (ev->pos().x() >= rc.width()-startx)
+		else if (ev->pos().x() > rc.width()-startx)
 		{
 			_timeBar->timeLine()->setCurrentTime(_timeBar->timeLine()->duration()-1);
+			emit timeChanged();
+			repaint();
+		}
+		else if (ev->pos().x() < startx)
+		{
+			_timeBar->timeLine()->setCurrentTime(0);
 			emit timeChanged();
 			repaint();
 		}
@@ -199,12 +216,16 @@ void TimeRuler::mouseMoveEvent(QMouseEvent *ev)
 
 void TimeRuler::setInMarker()
 {
+	_inMarker = _timeBar->timeLine()->currentTime() / 1000.0;
+	repaint();
 }
 
 //=======================================================================================
 
 void TimeRuler::setOutMarker()
 {
+	_outMarker = _timeBar->timeLine()->currentTime() / 1000.0;
+	repaint();
 }
 
 //=======================================================================================

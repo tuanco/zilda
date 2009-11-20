@@ -22,7 +22,7 @@
 
 //=======================================================================================
 
-#define TIMEBAR_HEIGHT 35
+#define TIMEBAR_HEIGHT 55
 #define TIMEBAR_BUTWIDTH 15
 #define TIMEBAR_BUTWIDTH3 30
 #define TIMEBAR_BUTWIDTH2 100
@@ -36,7 +36,7 @@ TimeBar::TimeBar(QWidget *parent)
 {
 	_snapFollow = true; 
 	
-	_timeLine->setDuration(0);
+	_timeLine->setDuration(1);
 	
 	setFixedHeight(TIMEBAR_HEIGHT);
 	
@@ -221,7 +221,8 @@ void TimeBar::setRange(qreal startTime, qreal endTime)
 void TimeBar::firstClicked()
 {
 	_timeLine->setCurrentTime(0);
-	_timeRuler->setStartSecs(0);
+	_timeRuler->setStartSecs(0.0);
+	_timeRuler->repaint();
 }
 
 //=======================================================================================
@@ -229,7 +230,8 @@ void TimeBar::firstClicked()
 void TimeBar::lastClicked()
 {
 	_timeLine->setCurrentTime(_timeLine->duration()-1);
-	_timeRuler->setStartSecs(_timeLine->duration() / 1000 - _timeRuler->timeVisualized());
+	_timeRuler->setStartSecs(qMax(0.0, _timeLine->duration() / 1000 - _timeRuler->timeVisualized()));
+	_timeRuler->repaint();
 }
 
 //=======================================================================================
