@@ -25,7 +25,6 @@ static QString ProductName = "zILDA";
 
 MainWindow::MainWindow(QWidget *parent, Qt::WFlags flags)
 : QMainWindow(parent, flags)
-, _isMaximized(false)
 {
 	setupUi(this);
 
@@ -183,7 +182,7 @@ void MainWindow::openFile(const QString& fileName)
 
     _lastDirectory = fileInfo.absoluteFilePath();
 
-    _sequence = QSharedPointer<Sequence>(reader.readFile(fileName));
+    _sequence = reader.readFile(fileName);
     _sequence->setPalette(*_currentPalette);
 
     // Fill file statistics
@@ -399,5 +398,9 @@ void MainWindow::fileSaveAs()
 
 void MainWindow::saveFile(const QString& fileName)
 {
-//	int startFrame = _timeLine->
+	int firstFrame = _timeLine->frameForTime(_timeBar->inMarker() * 1000);
+	int lastFrame = _timeLine->frameForTime(_timeBar->outMarker() * 1000);
+	
+	qDebug() << "FirstFrame: " << firstFrame;
+	qDebug() << "LastFrame : " << lastFrame;
 }

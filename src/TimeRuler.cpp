@@ -83,7 +83,36 @@ void TimeRuler::paintEvent(QPaintEvent *)
 
 	painter.setPen(lineColor);
 	painter.drawRect(startx, 37, delta, 14);
-	painter.fillRect(startx + _inMarker*40, 37, startx+_outMarker*40 - (startx + _inMarker*40), 14, lineColor);
+
+
+	int x = 0, width = 0;
+	
+	if (_inMarker >= _startSecs && _inMarker <= _startSecs + _timeVisualized &&
+		_outMarker > _inMarker && _outMarker <= _startSecs + _timeVisualized)
+	{
+		x = startx + (_inMarker-_startSecs)*40;
+		width = (_outMarker-_startSecs)*40;
+	}
+	else if (_inMarker >= _startSecs && _inMarker <= _startSecs + _timeVisualized &&
+			 _outMarker > _startSecs + _timeVisualized)
+	{
+		x = startx + (_inMarker-_startSecs)*40;
+		width = delta;
+	}
+	else if (_inMarker < _startSecs &&
+			 _outMarker > _startSecs && _outMarker <= _startSecs + _timeVisualized)
+	{
+		x = startx;
+		width = (_outMarker-_startSecs)*40;
+	}
+	else if (_inMarker < _startSecs && _outMarker > _startSecs + _timeVisualized)
+	{
+		x = startx;
+		width = delta;
+	}
+
+	if (x > 0 && width > 0)
+		painter.fillRect(x, 37, width - (x - startx), 14, lineColor);
 	
 	
 	for (int i=0; i<=nSecs*10; i++)
@@ -118,8 +147,8 @@ void TimeRuler::paintEvent(QPaintEvent *)
 
 	// Draw the current time marker
 	qreal demoTime = (qreal)_timeBar->timeLine()->currentTime() / 1000.0;
-	/*if (demoTime - _startSecs < nSecs+0.01 && 
-	    demoTime >= _startSecs)*/
+	if (demoTime - _startSecs < nSecs+0.01 && 
+	    demoTime >= _startSecs)
 	{
 		int barx = (int)((demoTime - _startSecs) * 40 + startx);
 		QPen pen(Qt::red);

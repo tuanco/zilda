@@ -23,7 +23,7 @@ public:
 			ReaderWriterILDA();
 	virtual ~ReaderWriterILDA();
 
-	Sequence*	readFile(const QString& fileName);
+	SequenceRef readFile(const QString& fileName);
 
 	QString		version() const;
 
@@ -38,7 +38,7 @@ private:
 					   QString& companyName, quint16& entryCount, 
 					   quint16& objectNumber, quint16& objectCount);
 
-	Sequence		*_sequence;
-	QVector<QColor> _currentPalette;
+	SequenceRef		_sequence;
+	QVector<QColor>	_currentPalette;
 	QList<int>		_ildaVersion;
 };

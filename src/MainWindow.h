@@ -14,8 +14,8 @@
 
 // Project
 #include "ui_MainWindow.h"
+#include "Sequence.h"
 
-class Sequence;
 class Frame;
 class QTime;
 
@@ -62,13 +62,12 @@ private:
 	void			writeSettings() const;
 	void			readSettings();
 
-	QSharedPointer<Sequence>	_sequence;
-	QTimeLine					*_timeLine;
-	QGraphicsTextItem			*_noFileLoadedItem;
-	QVector<QColor>				_ildaPalette;
-	QVector<QColor>				_pangolinPalette;
-	QVector<QColor>				*_currentPalette;
-    QString						_lastDirectory,
-                                _lastFileBrowserItem;
-	bool						_isMaximized;
+	SequenceRef			_sequence;
+	QTimeLine			*_timeLine;
+	QGraphicsTextItem	*_noFileLoadedItem;
+	QVector<QColor>		_ildaPalette;
+	QVector<QColor>		_pangolinPalette;
+	QVector<QColor>		*_currentPalette;
+    QString				_lastDirectory,
+                        _lastFileBrowserItem;
 };

@@ -30,7 +30,7 @@ ReaderWriterILDA::~ReaderWriterILDA()
 
 //=======================================================================================
 
-Sequence* ReaderWriterILDA::readFile(const QString& fileName)
+SequenceRef ReaderWriterILDA::readFile(const QString& fileName)
 {
 	QFile file(fileName);
 
@@ -40,7 +40,7 @@ Sequence* ReaderWriterILDA::readFile(const QString& fileName)
 		QDataStream stream(&file);
 		stream.setByteOrder(QDataStream::BigEndian);
 
-		_sequence = new Sequence();
+		_sequence = QSharedPointer<Sequence>(new Sequence());
 
 		while (!stream.atEnd() && !eof)
 		{
@@ -51,7 +51,7 @@ Sequence* ReaderWriterILDA::readFile(const QString& fileName)
 			if (memcmp(signature, "ILDA", 4))
 			{
 				file.close();
-				return 0L;
+				return SequenceRef();
 			}
 
 			quint32 formatType;

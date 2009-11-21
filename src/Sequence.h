@@ -48,16 +48,7 @@ public:
 
 public slots:
 
-	void	gotoFirstFrame();
-	void	gotoLastFrame();
-	void	stopPlayback();
-	void	startPlayback();
 	void	setActiveFrame(int nr);
-
-
-protected slots:
-
-	void	timerTriggered();
 
 
 signals:
@@ -69,7 +60,8 @@ private:
 
 	QVector<QSharedPointer<Frame> >				_frames;
 	QVector<QSharedPointer<Frame> >::iterator	_currentFrame;
-	QPointer<QTimer>							_timer;
 	DrawModes									_drawMode;
 	QVector<QColor>								_palette;
 };
+
+typedef QSharedPointer<Sequence> SequenceRef;

@@ -12,11 +12,13 @@
 // Qt
 #include <QList>
 #include <QGraphicsItem>
+#include <QWeakPointer>
+#include <QSharedPointer>
 
 // Project
 #include "Point.h"
+#include "Sequence.h"
 
-class Sequence;
 
 class Frame
 {
@@ -29,7 +31,7 @@ public:
 		FF_3D,
 		FF_2D
 	};
-					Frame(Sequence *parent, bool is3D);
+					Frame(const SequenceRef& parent, bool is3D);
 	virtual			~Frame();
 
 	void			addPoint(const Point& point);
@@ -55,5 +57,6 @@ private:
 	int			 _nr;
 	int			 _numberOfVisiblePoints;
 	FrameFormat	 _format;
-	Sequence	 *_parent;
+	
+	QWeakPointer<Sequence>	_parent;
 };

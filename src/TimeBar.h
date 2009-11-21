@@ -52,6 +52,9 @@ public:
 	
 	QTimeLine*	timeLine() { return _timeLine; }
 	
+	qreal	inMarker() const { return _timeRuler->inMarker(); }
+	qreal	outMarker() const { return _timeRuler->outMarker(); }
+	
 	
 private:
 	

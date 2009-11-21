@@ -16,7 +16,7 @@
 
 //=======================================================================================
 
-Frame::Frame(Sequence *parent, bool is3D)
+Frame::Frame(const SequenceRef& parent, bool is3D)
 : _nr(-1)
 , _numberOfVisiblePoints(0)
 , _parent(parent)
@@ -107,9 +107,10 @@ QColor Frame::penColor(const Point& point) const
 	{
 		return point.color();
 	}
-	else if (_parent)
+	else if (!_parent.isNull())
 	{
-		const QVector<QColor>& pal = _parent->palette();
+		QSharedPointer<Sequence> parent = _parent.toStrongRef();
+		const QVector<QColor>& pal = parent->palette();
 		quint8 index = point.colorIndex();
 
 		if (pal.empty())

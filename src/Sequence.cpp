@@ -17,16 +17,12 @@ Sequence::Sequence()
 : _currentFrame(_frames.end())
 , _drawMode(DrawModeNormal)
 {
-	//_timer = QPointer<QTimer>(new QTimer());
-	//connect(_timer.data(), SIGNAL(timeout()), this, SLOT(timerTriggered()));
-	//_timer->start(42);
 }
 
 //=======================================================================================
 
 Sequence::~Sequence()
 {
-	//_timer->stop();
 }
 
 //=======================================================================================
@@ -68,56 +64,6 @@ void Sequence::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 				(*_currentFrame)->paintDiagnostic(painter);
 				break;
 		}
-	}
-}
-
-//=======================================================================================
-
-void Sequence::timerTriggered()
-{
-	_currentFrame++;
-	
-	if (_currentFrame == _frames.end())
-		_currentFrame = _frames.begin();
-
-	emit frameChanged((*_currentFrame).data());
-
-	update();
-}
-
-//=======================================================================================
-
-void Sequence::gotoFirstFrame()
-{
-	stopPlayback();
-	setActiveFrame(0);
-}
-
-//=======================================================================================
-
-void Sequence::gotoLastFrame()
-{
-	stopPlayback();
-	setActiveFrame(_frames.count()-1);
-}
-
-//=======================================================================================
-
-void Sequence::stopPlayback()
-{
-	if (!_timer.isNull())
-	{
-		_timer->stop();
-	}
-}
-
-//=======================================================================================
-
-void Sequence::startPlayback()
-{
-	if (!_timer.isNull() && !_timer->isActive())
-	{
-		_timer->start(42);
 	}
 }
 
