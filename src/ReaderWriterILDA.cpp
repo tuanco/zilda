@@ -279,3 +279,33 @@ QString ReaderWriterILDA::version() const
 
 	return retValue;
 }
+
+//=======================================================================================
+
+bool ReaderWriterILDA::writeFile(const QString& fileName, SequenceRef sequence)
+{
+	if (sequence.isNull())
+		return false;
+	
+	if (fileName.isEmpty())
+		return false;
+	
+	QFile file(fileName);
+	
+	if (file.open(QIODevice::WriteOnly))
+	{
+		QDataStream stream(&file);
+		stream.setByteOrder(QDataStream::BigEndian);
+		
+		for (int i=0; i<sequence->frameCount(); ++i)
+		{
+			Frame *frame = sequence->frame(i);
+			
+			stream << "ILDA";
+			stream << 4;
+		}
+	}
+	
+	return false;
+}
+

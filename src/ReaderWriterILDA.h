@@ -24,6 +24,7 @@ public:
 	virtual ~ReaderWriterILDA();
 
 	SequenceRef readFile(const QString& fileName);
+	bool		writeFile(const QString& fileName, SequenceRef sequence);
 
 	QString		version() const;
 
